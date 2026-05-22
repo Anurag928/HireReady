@@ -1,0 +1,54 @@
+from flask import Blueprint, request, jsonify, current_app
+from services.user_service import get_user_by_uid, upsert_user
+from bson import ObjectId
+
+user_bp = Blueprint('user', __name__)
+
+@user_bp.route('/user', methods=['POST'])
+def create_or_update_user():
+    """Create a new user document or return existing one.
+
+    Expected JSON payload:
+    {
+        "uid": "string",
+        "name": "string",
+        "email": "string",
+        "photoURL": "string"
+    }
+    """
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"error": "Invalid JSON payload"}), 400
+
+    # Validate required fields
+    if not data.get("uid"):
+        return jsonify({"error": "Missing field: uid"}), 400
+
+    try:
+        # Try to fetch existing user
+        existing_user = get_user_by_uid(data["uid"])  # returns None if not found
+        if existing_user:
+            # Update lastLogin timestamp
+            updated_user = upsert_user(data, is_update=True)
+            if "_id" in updated_user: updated_user["_id"] = str(updated_user["_id"])
+            return jsonify({"message": "User exists", "user": updated_user}), 200
+        else:
+            new_user = upsert_user(data, is_update=False)
+            if "_id" in new_user: new_user["_id"] = str(new_user["_id"])
+            return jsonify({"message": "User saved successfully", "user": new_user}), 201
+    except Exception as e:
+        current_app.logger.error(f"User persistence error: {e}")
+        return jsonify({"error": "Internal server error"}), 500
+
+@user_bp.route('/user/<uid>', methods=['GET'])
+def get_user(uid):
+    """Fetch user by uid"""
+    try:
+        user = get_user_by_uid(uid)
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+        if "_id" in user: user["_id"] = str(user["_id"])
+        return jsonify({"message": "Success", "user": user}), 200
+    except Exception as e:
+        current_app.logger.error(f"Fetch user error: {e}")
+        return jsonify({"error": "Internal server error"}), 500

@@ -1,0 +1,19 @@
+{
+  "exclude": [
+    "**/__pycache__",
+    "**/venv",
+    "**/*__pyrefly_virtual__*",
+    "**/__pyrefly_virtual__/**",
+    "**/inmemory/**",
+    "**/test_api.py",
+    "**/test_resume_api.py",
+    "**/e2e_test.py",
+    "**/pdf_parser.py",
+    "**/docx_parser.py"
+  ],
+  "ignore": [
+    "**/*__pyrefly_virtual__*",
+    "**/__pyrefly_virtual__/**",
+    "**/inmemory/**"
+  ]
+}
