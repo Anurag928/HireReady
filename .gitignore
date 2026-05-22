@@ -57,3 +57,10 @@ venv.bak/
 .vscode/
 .idea/
 __pyrefly_virtual__/
+
+# Additional required ignores
+node_modules/
+.env
+__pycache__/
+dist/
+build/
