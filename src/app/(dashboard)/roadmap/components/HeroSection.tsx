@@ -78,13 +78,36 @@ export function HeroSection({ careerPath, onGenerate, timeline, isExporting }: H
                     <Target className="w-3.5 h-3.5 text-accent-purple" />
                     Est. Timeline
                   </span>
-                  <div className="flex flex-col">
-                    <span className="text-xl font-semibold leading-snug text-foreground max-w-[200px]">
-                      {timeline.split(' ').slice(0, 2).join(' ')}
-                    </span>
-                    <span className="text-sm text-muted-foreground mt-1 max-w-[200px] leading-relaxed">
-                      {timeline.split(' ').slice(2).join(' ')}
-                    </span>
+                  {/* Improved timeline layout: extract a concise headline (e.g., "6-9 months") and a supporting line */}
+                  <div className="flex flex-col max-w-[260px] break-words">
+                    {(() => {
+                      const t = (timeline || '').trim();
+                      // Try to extract a leading duration like "6-9 months" or "6 months"
+                      const durationMatch = t.match(/^(\d+\s*(?:-|–|—)\s*\d+\s*months?|\d+\s*months?)/i);
+                      let headline = t;
+                      let rest = '';
+                      if (durationMatch) {
+                        headline = durationMatch[0];
+                        rest = t.slice(durationMatch[0].length).trim();
+                      } else if (t.length > 28) {
+                        // Fallback: split near the first natural break to avoid overflowing
+                        const splitAt = Math.max(t.indexOf(' ', 18), 18);
+                        headline = t.slice(0, splitAt).trim();
+                        rest = t.slice(splitAt).trim();
+                      }
+                      return (
+                        <>
+                          <span className="text-xl md:text-2xl font-semibold leading-snug text-foreground">
+                            {headline}
+                          </span>
+                          {rest && (
+                            <span className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                              {rest}
+                            </span>
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
                 <div className="w-px h-16 bg-border hidden sm:block mx-4" />

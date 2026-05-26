@@ -20,7 +20,7 @@ export const submitOnboardingToBackend = (payload: any) => api.post("/onboarding
 
 export const getUserFromBackend = (uid: string) => api.get(`/user/${uid}`);
 
-export const generateRoadmapInBackend = (uid: string) => api.post("/generate-roadmap", { uid });
+export const generateRoadmapInBackend = (uid: string, force_regenerate: boolean = false, strategy_mode?: string) => api.post("/generate-roadmap", { uid, force_regenerate, strategy_mode });
 
 export const getRoadmapFromBackend = (uid: string) => api.get(`/roadmap/${uid}`);
 
@@ -28,7 +28,7 @@ export const getRoadmapHistoryFromBackend = (uid: string) => api.get(`/roadmap/h
 
 export const getRoadmapVersionFromBackend = (versionId: string) => api.get(`/roadmap/version/${versionId}`);
 
-export const analyzeResumeInBackend = (payload: { uid: string; resume_text: string; target_role: string }) => api.post("/analyze-resume", payload);
+export const analyzeResumeInBackend = (payload: { uid: string; resume_text: string; target_role: string; job_description?: string; test_mode?: boolean }) => api.post("/analyze-resume", payload);
 
 export const getResumeAnalysisFromBackend = (uid: string) => api.get(`/resume-analysis/${uid}`);
 

@@ -15,10 +15,12 @@ def analyze_resume_route():
     uid = data["uid"]
     resume_text = data["resume_text"]
     target_role = data.get("target_role", "Software Engineer")
+    job_description = data.get("job_description", "")
+    debug_mode = data.get("debug_mode", False)
     
     try:
-        current_app.logger.info(f"Analyzing resume for user {uid}")
-        resume_data = process_and_store_resume(uid, resume_text, target_role)
+        current_app.logger.info(f"Analyzing resume for user {uid} (Debug: {debug_mode})")
+        resume_data = process_and_store_resume(uid, resume_text, target_role, job_description, debug_mode=debug_mode)
         return success_response(data={"resume": resume_data}, message="Resume analyzed successfully")
     except Exception as e:
         current_app.logger.error(f"Resume analysis error: {str(e)}")

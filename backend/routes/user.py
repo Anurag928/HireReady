@@ -30,11 +30,11 @@ def create_or_update_user():
         if existing_user:
             # Update lastLogin timestamp
             updated_user = upsert_user(data, is_update=True)
-            if "_id" in updated_user: updated_user["_id"] = str(updated_user["_id"])
+            if updated_user and "_id" in updated_user: updated_user["_id"] = str(updated_user["_id"])
             return jsonify({"message": "User exists", "user": updated_user}), 200
         else:
             new_user = upsert_user(data, is_update=False)
-            if "_id" in new_user: new_user["_id"] = str(new_user["_id"])
+            if new_user and "_id" in new_user: new_user["_id"] = str(new_user["_id"])
             return jsonify({"message": "User saved successfully", "user": new_user}), 201
     except Exception as e:
         current_app.logger.error(f"User persistence error: {e}")

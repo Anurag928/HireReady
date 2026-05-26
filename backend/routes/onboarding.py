@@ -30,7 +30,7 @@ def handle_onboarding():
 
     try:
         user_doc = upsert_onboarding(data)
-        if "_id" in user_doc: user_doc["_id"] = str(user_doc["_id"])
+        if user_doc and "_id" in user_doc: user_doc["_id"] = str(user_doc["_id"])
         return jsonify({"message": "Onboarding saved", "user": user_doc}), 200
     except Exception as e:
         current_app.logger.error(f"Onboarding error: {e}")

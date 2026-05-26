@@ -1,36 +1,106 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CareerPilot AI
 
-## Getting Started
+**CareerPilot AI** is a premium, AI-driven career operating system designed to automate professional evolution. It transforms static career goals into dynamic, data-backed execution blueprints.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🚀 Core Features
+
+### 1. Intelligence Roadmap Engine
+Generates highly personalized, week-by-week career blueprints using **Gemini 1.5 Flash**. It analyzes your current "Career DNA" and target roles to build a "Career Operating System."
+
+### 2. 7 Evolution Strategy Modes
+Choose a specific professional "personality" for the AI to prioritize during roadmap generation:
+- **Production AI Path**: High-scale engineering focus.
+- **Research SOTA**: Deep dive into papers and state-of-the-art models.
+- **Rapid Career Pivot**: Accelerated learning for industry switchers.
+- **Deep Infrastructure**: Focus on ML Ops and system design.
+- **Product-Minded Engineer**: Bridging technical depth with business impact.
+
+### 3. Career Evolution Timeline
+A cinematic history system that treats your career as a series of "Snapshots":
+- **Growth Delta**: Automatically calculates % improvement between roadmap versions.
+- **Readiness Velocity**: Visualizes your trajectory toward market-competitive levels.
+- **AI Evolution Feedback**: Contextual insights on strategy shifts and skill unlocks.
+
+### 4. Cinematic Analytics Dashboard
+Real-time visualizing of your professional status:
+- **Skill Radar Charts**: Multidimensional breakdown of core competencies.
+- **Trajectory Graphs**: Time-based growth forecasting.
+- **Market Readiness Stats**: High-visibility KPIs for recruiter-grade readiness.
+
+### 5. Intelligent Resumé Ecosystem
+- **AI Resume Enhancement**: Real-time tailoring of your experience.
+- **Fix My Resume Roadmap**: A corrective action plan specifically to fill experience gaps found in your resume.
+
+---
+
+## 🔄 Workflow
+
+```mermaid
+graph TD
+    A[Onboarding] -->|User DNA| B[Dashboard]
+    B -->|Trigger Intelligence| C{Strategy Mode Selection}
+    C -->|Production/Research/etc| D[AI Generation Engine]
+    D -->|Neural Synthesis| E[Roadmap Snapshot vN]
+    E -->|Persistence| F[(MongoDB)]
+    E -->|Comparison| G[Evolution Timeline]
+    G -->|Growth % / Velocity| H[Analytics Dashboard]
+    H -->|Gap Analysis| I[Weekly Action Plan]
+    I -->|Next Cycle| C
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1.  **Onboarding**: The system establishes your baseline skills and target trajectory.
+2.  **Strategic Generation**: Select an Evolution Strategy to guide the AI's technical depth.
+3.  **Snapshot Synthesis**: The engine generates a comprehensive JSON blueprint with weekly tasks and project recommendations.
+4.  **Evolution Tracking**: Every generation creates a "Snapshot," allowing the system to track growth deltas and progression.
+5.  **Execution & Analytics**: Monitor readiness through the **Vertical Timeline** and **Velocity Charts**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠 Tech Stack
 
-## Learn More
+- **Frontend**: Next.js 15 (App Router), React 19, Tailwind CSS.
+- **Animations**: Framer Motion (Glassmorphic effects & Cinematic transitions).
+- **Data Visualization**: Recharts (Radar, Area, and Line charts).
+- **Icons**: Lucide-react.
+- **Backend**: Python (Flask/FastAPI), MongoDB.
+- **AI Engine**: Gemini 1.5 Flash (via specialized prompt engineering).
+- **Infrastructure**: Firebase (Auth & Storage).
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📁 Repository Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `backend/services/ai_service.py`: The core AI logical engine and strategy definitions.
+- `src/app/(dashboard)/roadmap/`: The primary roadmap experience and timeline UI.
+- `src/app/onboarding/`: Intake system for baseline career data.
+- `src/lib/api.ts`: Centralized communication with the AI backend.
+- `src/utils/pdfExport.ts`: Generates high-fidelity PDF career reports.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## ⚡ Getting Started
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Prerequisites
+- Node.js 18+
+- Python 3.9+
+- MongoDB instance
+
+### Installation
+1. **Frontend**:
+   ```bash
+   npm install
+   npm run dev
+   ```
+2. **Backend**:
+   ```bash
+   cd backend
+   pip install -r requirements.txt
+   python app.py
+   ```
+
+---
+
+*Built with ❤️ for the next generation of AI Engineers.*
+

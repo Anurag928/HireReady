@@ -16,7 +16,7 @@ def create_user(uid: str, name: str, email: str, photo_url: str) -> Dict[str, An
     """Insert a new user document and return the inserted document.
     ``createdAt`` and ``lastLogin`` are set to current UTC time.
     """
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.timezone.utc)
     doc = {
         "uid": uid,
         "name": name,
@@ -38,7 +38,7 @@ def update_last_login(uid: str) -> Optional[Dict[str, Any]]:
     """Update the ``lastLogin`` field for the given uid and return the updated document.
     Returns None if the user does not exist.
     """
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.timezone.utc)
     try:
         result = users_collection.find_one_and_update(
             {"uid": uid},
@@ -49,7 +49,7 @@ def update_last_login(uid: str) -> Optional[Dict[str, Any]]:
     except PyMongoError as e:
         raise RuntimeError(f"Database error while updating lastLogin: {e}")
 
-def upsert_user(data: Dict[str, Any], is_update: bool = False) -> Dict[str, Any]:
+def upsert_user(data: Dict[str, Any], is_update: bool = False) -> Optional[Dict[str, Any]]:
     """Insert or update a user document.
 
     Parameters
@@ -68,7 +68,7 @@ def upsert_user(data: Dict[str, Any], is_update: bool = False) -> Dict[str, Any]
     if not uid:
         raise ValueError("uid is required for upsert_user")
 
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.timezone.utc)
     # Base fields to set on every upsert
     update_fields = {
         "name": data.get("name"),

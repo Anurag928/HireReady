@@ -7,7 +7,9 @@ def success_response(data=None, message="Success", status=200):
         "data": data
     }), status
 
-def error_response(message: str, status_code: int = 400, details: dict = None):
+from typing import Optional
+
+def error_response(message: str, status_code: int = 400, details: Optional[dict] = None):
     response = {
         "success": False,
         "error": message

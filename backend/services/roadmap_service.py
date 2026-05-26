@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from services.ai_service import generate_roadmap_json
 from services.user_service import get_user_by_uid
 from services.mongo_service import db
@@ -9,7 +9,9 @@ roadmap_history_collection = db["roadmap_history"]
 
 import logging
 
-def create_and_store_roadmap(uid: str) -> dict:
+from typing import Optional
+
+def create_and_store_roadmap(uid: str, force_regenerate: bool = False, strategy_mode: Optional[str] = None) -> Optional[dict]:
     """Fetch user, generate roadmap via AI, and store in MongoDB."""
     logging.info(f"[Roadmap Service] Initiating roadmap for {uid}")
     
@@ -24,26 +26,52 @@ def create_and_store_roadmap(uid: str) -> dict:
         raise Exception(f'{{"stage": "mongodb_fetch", "error": "{str(e)}"}}')
         
     try:
-        # Check if roadmap already exists in MongoDB cache
-        existing_roadmap = roadmaps_collection.find_one({"uid": uid})
-        if existing_roadmap:
-            logging.info(f"[Roadmap Service] Found cached roadmap for {uid}, returning instantly")
-            if "_id" in existing_roadmap:
-                existing_roadmap["_id"] = str(existing_roadmap["_id"])
-            return existing_roadmap
+        # Check if roadmap already exists in MongoDB cache (unless forcing regeneration)
+        if not force_regenerate:
+            existing_roadmap = roadmaps_collection.find_one({"uid": uid})
+            if existing_roadmap:
+                logging.info(f"[Roadmap Service] Found cached roadmap for {uid}, returning instantly")
+                if "_id" in existing_roadmap:
+                    existing_roadmap["_id"] = str(existing_roadmap["_id"])
+                return existing_roadmap
     except Exception as e:
         logging.error(f"Error checking roadmap cache: {e}")
         
     # generate_roadmap_json handles its own internal stage errors
-    roadmap_data = generate_roadmap_json(user)
+    roadmap_data = generate_roadmap_json(user, force_regenerate=force_regenerate, strategy_mode=strategy_mode)
     
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
+    
+    # Calculate trajectory based on score difference if possible
+    trajectory = "Stable"
+    try:
+        existing = roadmaps_collection.find_one({"uid": uid})
+        if existing:
+            prev_score = existing.get("readiness_score", existing.get("roadmap_score", 0))
+            curr_score = roadmap_data.get("readiness_score", roadmap_data.get("roadmap_score", 0))
+            if curr_score > prev_score + 10:
+                trajectory = "Accelerating"
+            elif curr_score > prev_score + 2:
+                trajectory = "Strong"
+            elif curr_score < prev_score:
+                trajectory = "Needs Focus"
+    except:
+        pass
+
     roadmap_doc = {
         "uid": uid,
         "createdAt": now,
         "updatedAt": now,
         "generationStatus": "success",
         "aiModelUsed": "gemini-1.5-flash",
+        "focus_area": roadmap_data.get("focus_area", "Balanced Strategy"),
+        "roadmap_score": roadmap_data.get("roadmap_score", 85),
+        "readiness_score": roadmap_data.get("readiness_score", 50),
+        "strongest_skill": roadmap_data.get("strongest_skill", "N/A"),
+        "biggest_weakness": roadmap_data.get("biggest_weakness", "N/A"),
+        "strategy_mode": roadmap_data.get("strategy_mode", "Standard"),
+        "trajectory": roadmap_data.get("trajectory", trajectory),
+        "top_gap": roadmap_data.get("biggest_weakness", "N/A"),
         "roadmap": roadmap_data
     }
     
@@ -94,7 +122,7 @@ def get_roadmap_history(uid: str) -> list:
         history.append(doc)
     return history
 
-def get_roadmap_version(version_id: str) -> dict:
+def get_roadmap_version(version_id: str) -> Optional[dict]:
     """Fetch a specific roadmap version by ID."""
     from bson.objectid import ObjectId
     try:

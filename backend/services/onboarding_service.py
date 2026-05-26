@@ -5,7 +5,9 @@ from services.mongo_service import users_collection
 from pymongo.errors import PyMongoError
 
 
-def upsert_onboarding(data: Dict[str, Any]) -> Dict[str, Any]:
+from typing import Dict, Any, Optional
+
+def upsert_onboarding(data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """Update onboarding information for an existing user.
 
     Parameters
@@ -34,7 +36,7 @@ def upsert_onboarding(data: Dict[str, Any]) -> Dict[str, Any]:
         "preferred_domain": data.get("preferred_domain"),
         "onboarding_completed": True,
         "profile_complete": True,
-        "updatedAt": datetime.datetime.utcnow(),
+        "updatedAt": datetime.datetime.now(datetime.timezone.utc),
     }
 
     try:

@@ -7,9 +7,12 @@ from google import genai
 # pyrefly: ignore [missing-import]
 from google.genai import types
 from prompts.resume_prompt import RESUME_ANALYSIS_PROMPT, RESUME_REWRITE_PROMPT, INTERVIEW_QUESTIONS_PROMPT
+from prompts.debug_prompt import RESUME_DEBUG_PROMPT
 from services.ai_service import clean_json_response
 
-def generate_with_retry(client, prompt: str, primary_model='gemini-2.5-flash') -> dict:
+from typing import Optional
+
+def generate_with_retry(client, prompt: str, primary_model='gemini-2.5-flash') -> Optional[dict]:
     models_to_try = [primary_model, 'gemini-1.5-pro', 'gemini-1.5-flash']
     
     for attempt, model_name in enumerate(models_to_try, 1):
@@ -33,17 +36,29 @@ def generate_with_retry(client, prompt: str, primary_model='gemini-2.5-flash') -
                 logging.error("[AI Resume Service] All fallback models failed.")
                 raise Exception("AI service unavailable after multiple model fallbacks.")
 
-def analyze_resume(resume_text: str, target_role: str) -> dict:
+def analyze_resume(resume_text: str, target_role: str, job_description: str = "", debug_mode: bool = False) -> Optional[dict]:
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         raise Exception("GEMINI_API_KEY not set")
     
     client = genai.Client(api_key=api_key)
-    prompt = RESUME_ANALYSIS_PROMPT.format(resume_text=resume_text, target_role=target_role)
+    
+    if debug_mode:
+        prompt = RESUME_DEBUG_PROMPT.format(
+            resume=resume_text, 
+            target_role=target_role, 
+            jd=job_description
+        )
+    else:
+        prompt = RESUME_ANALYSIS_PROMPT.format(
+            resume=resume_text, 
+            target_role=target_role, 
+            jd=job_description
+        )
     
     return generate_with_retry(client, prompt)
 
-def rewrite_resume_section(original_text: str, style: str) -> dict:
+def rewrite_resume_section(original_text: str, style: str) -> Optional[dict]:
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         raise Exception("GEMINI_API_KEY not set")
@@ -53,7 +68,7 @@ def rewrite_resume_section(original_text: str, style: str) -> dict:
     
     return generate_with_retry(client, prompt)
 
-def generate_interview_questions(resume_text: str) -> dict:
+def generate_interview_questions(resume_text: str) -> Optional[dict]:
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         raise Exception("GEMINI_API_KEY not set")

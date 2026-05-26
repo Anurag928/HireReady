@@ -165,9 +165,9 @@ export default function LandingPage() {
                     key={i} 
                     className="relative pl-24"
                   >
-                    <div className="absolute left-8 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-background border-4 border-card flex items-center justify-center z-10">
-                      {node.status === 'completed' && <div className="w-3 h-3 bg-green-500 rounded-full" />}
-                      {node.status === 'current' && <div className="w-3 h-3 bg-accent-blue rounded-full animate-pulse shadow-[0_0_15px_rgba(59,130,246,0.6)]" />}
+                     <div className="absolute left-8 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-background border-4 border-card flex items-center justify-center z-10">
+                       {node.status === 'completed' && <div className="w-3 h-3 bg-green-500 rounded-full" />}
+                       {node.status === 'current' && <div className="w-3 h-3 bg-accent-blue rounded-full animate-pulse shadow-[0_0_15px_rgba(59,130,246,0.6)]" />}
                     </div>
                     <div className={`p-6 rounded-2xl border ${node.status === 'current' ? 'bg-card border-accent-blue/40 shadow-lg' : 'bg-background/50 border-white/5'} backdrop-blur-sm`}>
                       <span className={`text-xs font-bold uppercase tracking-wider mb-2 block ${node.status === 'current' ? 'text-accent-blue' : 'text-foreground/40'}`}>{node.level}</span>

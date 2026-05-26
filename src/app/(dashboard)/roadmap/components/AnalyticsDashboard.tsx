@@ -134,24 +134,51 @@ export function AnalyticsDashboard({ userRole, targetRole, timeline }: Analytics
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: 0.2 }}
-        className="col-span-1 lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4"
+        className="col-span-1 lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"
       >
         {[
           { label: "AI Readiness", value: "92%", icon: Zap, color: "text-orange-500", bg: "bg-orange-500/10" },
           { label: "Market Fit", value: "High", icon: Activity, color: "text-green-500", bg: "bg-green-500/10" },
           { label: "Timeline", value: timeline, icon: TrendingUp, color: "text-accent-blue", bg: "bg-accent-blue/10" },
-          { label: "Target Role", value: targetRole.split(" ")[0], icon: Target, color: "text-accent-purple", bg: "bg-accent-purple/10" }
-        ].map((stat, i) => (
-          <div key={i} className="p-5 rounded-2xl bg-card/60 backdrop-blur-sm border border-border flex items-center gap-4 hover:bg-card/80 transition-colors shadow-sm">
-            <div className={`p-3 rounded-xl ${stat.bg}`}>
-              <stat.icon className={`w-6 h-6 ${stat.color}`} />
+          { label: "Target Role", value: targetRole, icon: Target, color: "text-accent-purple", bg: "bg-accent-purple/10" }
+        ].map((stat, i) => {
+          let displayValue = stat.value;
+          let subValue = "";
+
+          if (stat.label === "Timeline") {
+            const t = (stat.value || "").trim();
+            const durationMatch = t.match(/^(\d+\s*(?:-|–|—)\s*\d+\s*months?|\d+\s*months?)/i);
+            if (durationMatch) {
+              displayValue = durationMatch[0];
+              subValue = t.slice(durationMatch[0].length).trim();
+            } else if (t.length > 20) {
+              const splitAt = t.indexOf(" ", 12);
+              if (splitAt !== -1) {
+                displayValue = t.slice(0, splitAt).trim();
+                subValue = t.slice(splitAt).trim();
+              }
+            }
+          }
+
+          if (stat.label === "Target Role") {
+             displayValue = stat.value;
+          }
+
+          return (
+            <div key={i} className="p-5 rounded-2xl bg-card/60 backdrop-blur-sm border border-border flex items-center gap-4 hover:bg-card/80 transition-colors shadow-sm overflow-hidden">
+              <div className={`p-3 rounded-xl shrink-0 ${stat.bg}`}>
+                <stat.icon className={`w-6 h-6 ${stat.color}`} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] text-foreground/50 uppercase tracking-wider font-bold mb-0.5">{stat.label}</p>
+                <p className="text-lg font-bold leading-tight text-balance">{displayValue}</p>
+                {subValue && (
+                  <p className="text-[10px] text-muted-foreground leading-tight mt-1">{subValue}</p>
+                )}
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-foreground/50 uppercase tracking-wider font-semibold">{stat.label}</p>
-              <p className="text-xl font-bold">{stat.value}</p>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </motion.div>
     </div>
   );

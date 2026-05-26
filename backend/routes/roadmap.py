@@ -12,9 +12,11 @@ def generate_roadmap_route():
         return error_response("Missing uid in request", 400)
         
     uid = data["uid"]
+    force_regenerate = data.get("force_regenerate", False)
+    strategy_mode = data.get("strategy_mode", None)
     
     try:
-        roadmap = create_and_store_roadmap(uid)
+        roadmap = create_and_store_roadmap(uid, force_regenerate=force_regenerate, strategy_mode=strategy_mode)
         return success_response(data={"roadmap": roadmap}, message="Roadmap generated successfully")
     except Exception as e:
         import json

@@ -5,8 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle, Code2, GraduationCap, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { generateRoadmapInBackend, getRoadmapFromBackend, getRoadmapHistoryFromBackend } from "@/api";
-import html2canvas from "html2canvas-pro";
-import { jsPDF } from "jspdf";
+
 
 // Components
 import { HeroSection } from "./components/HeroSection";
@@ -16,6 +15,8 @@ import { ProjectGrid } from "./components/ProjectGrid";
 import { AnalyticsDashboard } from "./components/AnalyticsDashboard";
 import { FloatingToolbar } from "./components/FloatingToolbar";
 import { HistoryModal } from "./components/HistoryModal";
+import { StrategyModeModal } from "./components/StrategyModeModal";
+import { exportRoadmapToPDF } from "@/utils/pdfExport";
 
 // --- Types ---
 interface RoadmapData {
@@ -56,6 +57,7 @@ export default function RoadmapPage() {
   const [error, setError] = useState<any>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isStrategyModalOpen, setIsStrategyModalOpen] = useState(false);
   const [historyData, setHistoryData] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
@@ -81,12 +83,12 @@ export default function RoadmapPage() {
     }
   }, [user]);
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (forceRegenerate: boolean = false, strategyMode?: string) => {
     if (!user) return;
     try {
       setGenerating(true);
       setError(null);
-      const res = await generateRoadmapInBackend(user.uid);
+      const res = await generateRoadmapInBackend(user.uid, forceRegenerate, strategyMode);
       if (res.data?.success) {
         setRoadmap(res.data.data.roadmap.roadmap);
       } else {
@@ -135,49 +137,18 @@ export default function RoadmapPage() {
 
   const handlePrint = async () => {
     setIsExporting(true);
-    // Wait for the DOM to update with export-safe styles
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    try {
-      const element = document.getElementById("roadmap-container");
-      if (!element) return;
-      
-      const canvas = await html2canvas(element, { 
-        scale: 2, 
-        useCORS: true, 
-        backgroundColor: '#020617',
-        windowWidth: 1200 // Force desktop layout
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'px',
-        format: 'a4'
-      });
-      
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-      
-      let heightLeft = imgHeight;
-      let position = 0;
-      
-      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-      heightLeft -= pageHeight;
-      
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-      
-      pdf.save("CareerPilot_AI_Roadmap.pdf");
-    } catch (e) {
-      console.error("PDF Export failed", e);
-    } finally {
+    // Give state time to update print styles
+    setTimeout(async () => {
+      await exportRoadmapToPDF("roadmap-container", roadmap?.career_path || "Roadmap");
       setIsExporting(false);
+    }, 500);
+  };
+
+  const handleTriggerGenerate = (isRegenerating: boolean) => {
+    if (isRegenerating) {
+      setIsStrategyModalOpen(true);
+    } else {
+      handleGenerate(false);
     }
   };
 
@@ -207,7 +178,7 @@ export default function RoadmapPage() {
               <HeroSection 
                 careerPath={""}
                 timeline={""}
-                onGenerate={handleGenerate}
+                onGenerate={() => handleTriggerGenerate(false)}
               />
               
               {/* Premium Error UI Display */}
@@ -230,7 +201,7 @@ export default function RoadmapPage() {
                           : "We've encountered unexpected turbulence while designing your roadmap."}
                       </p>
                       <button
-                        onClick={handleGenerate}
+                        onClick={() => handleTriggerGenerate(false)}
                         className="px-6 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 hover:border-red-500/50 text-red-400 font-medium transition-all"
                       >
                         Retry Generation
@@ -249,7 +220,7 @@ export default function RoadmapPage() {
   // --- ROADMAP RESULT VIEW ---
   return (
     <div 
-      className={`relative pb-32 print:pb-0 ${isExporting ? 'pdf-export-mode' : ''}`} 
+      className={`relative pb-32 print:pb-12 print:bg-white print:text-black ${isExporting ? 'pdf-export-mode' : ''}`} 
       id="roadmap-container"
     >
       {/* Universal Ambient Noise - Hide during export */}
@@ -257,12 +228,21 @@ export default function RoadmapPage() {
         <div className="fixed inset-0 pointer-events-none opacity-[0.03] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
       )}
 
-      <HeroSection 
-        careerPath={roadmap.career_path}
-        timeline={roadmap.estimated_timeline}
-        onGenerate={handleGenerate}
-        isExporting={isExporting}
-      />
+      {/* Print-only Header */}
+      <div className="hidden print:block text-center py-8 border-b border-gray-200 mb-8">
+        <h1 className="text-3xl font-black uppercase text-black tracking-widest mb-2">AI Career Roadmap Report</h1>
+        <p className="text-sm font-bold text-gray-500">Generated for: {roadmap.career_path}</p>
+        <p className="text-sm font-bold text-gray-500">Generated On: {new Date().toLocaleString()}</p>
+      </div>
+
+      <div className="print:hidden">
+        <HeroSection 
+          careerPath={roadmap.career_path}
+          timeline={roadmap.estimated_timeline}
+          onGenerate={() => handleTriggerGenerate(true)}
+          isExporting={isExporting}
+        />
+      </div>
 
       <motion.div 
         className="max-w-7xl mx-auto px-4 md:px-8 space-y-24"
@@ -398,7 +378,7 @@ export default function RoadmapPage() {
 
       <div className="print:hidden">
         <FloatingToolbar 
-          onRegenerate={handleGenerate}
+          onRegenerate={() => handleTriggerGenerate(true)}
           onPrint={handlePrint}
           onHistory={handleOpenHistory}
           isExporting={isExporting}
@@ -412,6 +392,17 @@ export default function RoadmapPage() {
         loading={loadingHistory}
         onSelectVersion={handleSelectHistoryVersion}
       />
+      
+      <StrategyModeModal
+        isOpen={isStrategyModalOpen}
+        onClose={() => setIsStrategyModalOpen(false)}
+        onSelectStrategy={(strategy) => handleGenerate(true, strategy)}
+      />
+      
+      {/* Print-only Footer */}
+      <div className="hidden print:block fixed bottom-4 left-0 w-full text-center py-4 border-t border-gray-200 mt-12 text-sm font-bold text-gray-400 uppercase tracking-widest">
+        Generated by CareerPilot AI
+      </div>
     </div>
   );
 }
