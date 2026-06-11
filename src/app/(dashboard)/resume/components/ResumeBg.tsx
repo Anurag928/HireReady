@@ -141,11 +141,11 @@ export default function ResumeBg() {
                 initial={{ opacity: 0 }}
                 animate={{ 
                   x: [100, 0],
-                  y: [Math.random() * 50 - 25, 0],
+                  y: [((i * 17) % 50) - 25, 0],
                   opacity: [0, 1, 0]
                 }}
                 transition={{ 
-                  duration: 2 + Math.random(),
+                  duration: 2 + ((i * 7) % 10) / 10,
                   repeat: Infinity,
                   delay: i * 0.4 
                 }}

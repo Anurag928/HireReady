@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// Our Flask backend base URL
-const BASE_URL = "http://127.0.0.1:5000/api";
+// Flask backend base URL with production-friendly fallback
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:5000/api";
 
 export const api = axios.create({
   baseURL: BASE_URL,
@@ -9,12 +9,68 @@ export const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+// Global store for recent API stats (for Developer Debug Panel)
+export const recentApiStats = {
+  lastCall: null as any
+};
+
+api.interceptors.request.use((config) => {
+  (config as any).metadata = { startTime: new Date() };
+  return config;
+});
+
+api.interceptors.response.use(
+  (response) => {
+    const duration = new Date().getTime() - (response.config as any).metadata.startTime.getTime();
+    recentApiStats.lastCall = {
+      url: response.config.url,
+      method: response.config.method?.toUpperCase(),
+      status: response.status,
+      duration,
+      requestData: response.config.data,
+      responseData: response.data,
+      error: null
+    };
+    return response;
+  },
+  (error) => {
+    const duration = error.config?.metadata?.startTime 
+      ? new Date().getTime() - error.config.metadata.startTime.getTime() 
+      : 0;
+      
+    const status = error.response?.status;
+    const message = error.response?.data?.error || error.response?.data?.message || error.message;
+    const data = error.response?.data;
+    
+    const errorDetails = {
+      status,
+      data,
+      message,
+      url: error.config?.url,
+      method: error.config?.method?.toUpperCase(),
+      duration
+    };
+
+    recentApiStats.lastCall = {
+      ...errorDetails,
+      requestData: error.config?.data,
+      error: message
+    };
+
+    console.error("API Request Failed", errorDetails);
+    
+    return Promise.reject(error);
+  }
+);
+
 export const createUserInBackend = (payload: {
   uid: string;
   name: string | null;
   email: string | null;
   photoURL: string | null;
 }) => api.post("/user", payload);
+
+export const deleteUserAccount = (uid: string) => api.delete(`/user/${uid}`);
 
 export const submitOnboardingToBackend = (payload: any) => api.post("/onboarding", payload);
 
@@ -37,3 +93,30 @@ export const getResumeHistoryFromBackend = (uid: string) => api.get(`/resume-his
 export const rewriteResumeSectionInBackend = (payload: { original_text: string; style: string }) => api.post("/rewrite-resume", payload);
 
 export const generateInterviewQuestionsInBackend = (payload: { resume_text: string }) => api.post("/generate-interview-questions", payload);
+
+export const startMockInterview = (payload: {
+  uid: string;
+  target_role: string;
+  interview_type: string;
+  difficulty: string;
+  company_style: string;
+  duration: string;
+}) => api.post("/mock-interview/start", payload);
+
+export const evaluateMockInterviewAnswer = (payload: {
+  settings: any;
+  active_question: any;
+  answer: string;
+}) => api.post("/mock-interview/evaluate", payload);
+
+export const finalizeMockInterview = (payload: {
+  uid: string;
+  settings: any;
+  transcript: any[];
+}) => api.post("/mock-interview/finalize", payload);
+
+export const getMockInterviewHistory = (uid: string) => api.get(`/mock-interview/history/${uid}`);
+
+export const deleteMockInterview = (interviewId: string) => api.delete(`/mock-interview/history/${interviewId}`);
+
+export const getDashboardMetrics = (uid: string) => api.get(`/dashboard/${uid}`);

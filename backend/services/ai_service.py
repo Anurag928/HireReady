@@ -156,7 +156,7 @@ def generate_and_parse(client, prompt: str, model_name: str, user_profile: dict)
         }))
 
 def retry_generation(client, prompt: str, user_profile: dict) -> dict:
-    model_to_use = 'gemini-1.5-flash'
+    model_to_use = 'gemini-2.0-flash'
     
     # Attempt 1
     logging.info("[AI Stage] Attempt 1 starting...")

@@ -52,3 +52,17 @@ def get_user(uid):
     except Exception as e:
         current_app.logger.error(f"Fetch user error: {e}")
         return jsonify({"error": "Internal server error"}), 500
+
+@user_bp.route('/user/<uid>', methods=['DELETE'])
+def delete_user(uid):
+    """Delete a user and all their associated data."""
+    try:
+        from services.user_service import delete_user_data
+        success = delete_user_data(uid)
+        if success:
+            return jsonify({"message": "User and all associated data deleted successfully"}), 200
+        else:
+            return jsonify({"error": "Failed to delete user"}), 500
+    except Exception as e:
+        current_app.logger.error(f"Delete user error: {e}")
+        return jsonify({"error": "Internal server error"}), 500

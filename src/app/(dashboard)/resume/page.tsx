@@ -24,19 +24,6 @@ export default function AIResumePage() {
   // Diagnostic mode toggle (can be triggered by pressing 'D' shift+')
   const [isDebugMode, setIsDebugMode] = useState(false);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.shiftKey && e.key === 'D') {
-        setIsDebugMode(prev => !prev);
-        console.log("🛠️ Diagnostic Mode:", !isDebugMode ? "ENABLED" : "DISABLED");
-      }
-      if (e.shiftKey && e.key === 'T') {
-        runSelfTest();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isDebugMode]);
 
   const runSelfTest = async () => {
     console.log("🧪 Initiating System Self-Test...");
@@ -159,6 +146,20 @@ export default function AIResumePage() {
       setShowSequencer(false);
     }
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.shiftKey && e.key === 'D') {
+        setIsDebugMode(prev => !prev);
+        console.log("🛠️ Diagnostic Mode:", !isDebugMode ? "ENABLED" : "DISABLED");
+      }
+      if (e.shiftKey && e.key === 'T') {
+        runSelfTest();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isDebugMode]);
 
   // Smooth scroll helper
   const scrollTo = (id: string, delay = 0) => {

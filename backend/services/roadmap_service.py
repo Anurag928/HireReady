@@ -1,11 +1,14 @@
 from datetime import datetime, timezone
 from services.ai_service import generate_roadmap_json
 from services.user_service import get_user_by_uid
-from services.mongo_service import db
+from services.mongo_service import get_collection
 
-# Collection for storing roadmaps
-roadmaps_collection = db["roadmaps"]
-roadmap_history_collection = db["roadmap_history"]
+def _roadmaps_collection():
+    return get_collection("roadmaps")
+
+
+def _roadmap_history_collection():
+    return get_collection("roadmap_history")
 
 import logging
 
@@ -28,7 +31,7 @@ def create_and_store_roadmap(uid: str, force_regenerate: bool = False, strategy_
     try:
         # Check if roadmap already exists in MongoDB cache (unless forcing regeneration)
         if not force_regenerate:
-            existing_roadmap = roadmaps_collection.find_one({"uid": uid})
+            existing_roadmap = _roadmaps_collection().find_one({"uid": uid})
             if existing_roadmap:
                 logging.info(f"[Roadmap Service] Found cached roadmap for {uid}, returning instantly")
                 if "_id" in existing_roadmap:
@@ -45,7 +48,7 @@ def create_and_store_roadmap(uid: str, force_regenerate: bool = False, strategy_
     # Calculate trajectory based on score difference if possible
     trajectory = "Stable"
     try:
-        existing = roadmaps_collection.find_one({"uid": uid})
+        existing = _roadmaps_collection().find_one({"uid": uid})
         if existing:
             prev_score = existing.get("readiness_score", existing.get("roadmap_score", 0))
             curr_score = roadmap_data.get("readiness_score", roadmap_data.get("roadmap_score", 0))
@@ -79,7 +82,7 @@ def create_and_store_roadmap(uid: str, force_regenerate: bool = False, strategy_
         logging.info("[Roadmap Service] Saving roadmap to MongoDB")
         
         # Check for existing version number
-        existing = roadmaps_collection.find_one({"uid": uid})
+        existing = _roadmaps_collection().find_one({"uid": uid})
         roadmapVersion = 1
         if existing and "roadmapVersion" in existing:
             roadmapVersion = existing["roadmapVersion"] + 1
@@ -92,7 +95,7 @@ def create_and_store_roadmap(uid: str, force_regenerate: bool = False, strategy_
             roadmap_doc["createdAt"] = existing["createdAt"]
         
         # Upsert the active roadmap
-        roadmaps_collection.replace_one(
+        _roadmaps_collection().replace_one(
             {"uid": uid}, 
             roadmap_doc, 
             upsert=True
@@ -101,10 +104,10 @@ def create_and_store_roadmap(uid: str, force_regenerate: bool = False, strategy_
         # Save to history collection
         history_doc = roadmap_doc.copy()
         history_doc["_id"] = None
-        roadmap_history_collection.insert_one(history_doc)
+        _roadmap_history_collection().insert_one(history_doc)
         
         # Return document
-        saved_roadmap = roadmaps_collection.find_one({"uid": uid})
+        saved_roadmap = _roadmaps_collection().find_one({"uid": uid})
         if saved_roadmap and "_id" in saved_roadmap:
             saved_roadmap["_id"] = str(saved_roadmap["_id"])
             
@@ -115,7 +118,7 @@ def create_and_store_roadmap(uid: str, force_regenerate: bool = False, strategy_
 
 def get_roadmap_history(uid: str) -> list:
     """Fetch all past roadmap versions for a user."""
-    history_cursor = roadmap_history_collection.find({"uid": uid}).sort("createdAt", -1)
+    history_cursor = _roadmap_history_collection().find({"uid": uid}).sort("createdAt", -1)
     history = []
     for doc in history_cursor:
         doc["_id"] = str(doc["_id"])
@@ -126,7 +129,7 @@ def get_roadmap_version(version_id: str) -> Optional[dict]:
     """Fetch a specific roadmap version by ID."""
     from bson.objectid import ObjectId
     try:
-        doc = roadmap_history_collection.find_one({"_id": ObjectId(version_id)})
+        doc = _roadmap_history_collection().find_one({"_id": ObjectId(version_id)})
         if doc:
             doc["_id"] = str(doc["_id"])
         return doc

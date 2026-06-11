@@ -71,6 +71,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       await signOut(auth);
+      // Fully clear storage and cached user data
+      localStorage.clear();
+      sessionStorage.clear();
+      setUser(null);
+      setDbUser(null);
+      // Hard redirect to the landing page to reset application state
+      window.location.href = "/";
     } catch (error) {
       console.error("Error signing out:", error);
     }

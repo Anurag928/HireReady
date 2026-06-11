@@ -19,8 +19,13 @@ def analyze_resume_route():
     debug_mode = data.get("debug_mode", False)
     
     try:
+        from services.activity_service import log_activity
         current_app.logger.info(f"Analyzing resume for user {uid} (Debug: {debug_mode})")
         resume_data = process_and_store_resume(uid, resume_text, target_role, job_description, debug_mode=debug_mode)
+        
+        # Log activity
+        log_activity(uid, "Resume Analyzed", "resume")
+        
         return success_response(data={"resume": resume_data}, message="Resume analyzed successfully")
     except Exception as e:
         current_app.logger.error(f"Resume analysis error: {str(e)}")

@@ -125,7 +125,7 @@ const EnhancementCard = ({ imp, index }: { imp: Improvement; index: number }) =>
               className="overflow-hidden"
             >
               <div className="mt-4 p-5 rounded-xl bg-black/60 border border-white/5 text-[11px] text-zinc-500 leading-relaxed font-bold uppercase tracking-wider">
-                 <span className="text-zinc-700 mr-2">// LOG:</span> 
+                 <span className="text-zinc-700 mr-2">{"// LOG:"}</span> 
                  {imp.reasoning}
               </div>
             </motion.div>

@@ -8,57 +8,33 @@ import {
 } from "recharts";
 import {
   Sparkles, TrendingUp, Target, BookOpen, Clock, FileText,
-  Code, Map as MapIcon, Briefcase, Activity, CheckCircle2, ChevronRight, Zap
+  Code, Map as MapIcon, Briefcase, Activity, CheckCircle2, ChevronRight, Zap,
+  AlertCircle
 } from "lucide-react";
 import { slideUp, staggerContainer, fadeIn } from "@/animations";
 import { useAuth } from "@/contexts/auth-context";
-import { onboardingService } from "@/services/onboardingService";
-import { UserProfile } from "@/types/user";
-
-// --- Mock / Dynamic Data Handlers ---
-
-const activityFeed = [
-  { title: "Completed onboarding profile", time: "2 hours ago", active: true },
-  { title: "Target career set", time: "2 hours ago", active: true },
-  { title: "Resume analysis pending", time: "In Progress", active: false },
-  { title: "AI Skill Gap Analysis", time: "Coming Soon", active: false },
-];
-
-const quickActions = [
-  { title: "Resume Analyzer", icon: FileText, color: "text-blue-500", bg: "bg-blue-500/10" },
-  { title: "AI Mock Interview", icon: Briefcase, color: "text-purple-500", bg: "bg-purple-500/10" },
-  { title: "GitHub Analyzer", icon: Code, color: "text-gray-400", bg: "bg-gray-500/10" },
-  { title: "AI Roadmap", icon: MapIcon, color: "text-green-500", bg: "bg-green-500/10" },
-  { title: "Skill Gap Analysis", icon: Target, color: "text-orange-500", bg: "bg-orange-500/10" },
-  { title: "Placement Tracker", icon: Activity, color: "text-red-500", bg: "bg-red-500/10" },
-];
+import { getDashboardMetrics } from "@/api";
+import Link from "next/link";
+import { formatDistanceToNow } from "date-fns";
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [metrics, setMetrics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user) {
-      onboardingService.getProfile(user.uid).then(p => {
-        setProfile(p);
+      getDashboardMetrics(user.uid).then(res => {
+        if (res.data?.success) {
+          setMetrics(res.data.data);
+        }
+        setLoading(false);
+      }).catch(err => {
+        console.error("Failed to fetch dashboard metrics", err);
         setLoading(false);
       });
     }
   }, [user]);
-
-  // Derived Dynamic Data
-  const displayName = profile?.name || user?.displayName?.split(" ")[0] || "Explorer";
-  const targetRole = profile?.targetRole || profile?.role || "Tech Professional";
-
-  const radarData = [
-    { subject: 'Frontend', A: profile?.skills?.includes('React') ? 90 : 40, fullMark: 100 },
-    { subject: 'Backend', A: profile?.skills?.includes('Flask') || profile?.skills?.includes('Node.js') ? 85 : 45, fullMark: 100 },
-    { subject: 'Database', A: profile?.skills?.includes('MongoDB') || profile?.skills?.includes('SQL') ? 80 : 35, fullMark: 100 },
-    { subject: 'AI/ML', A: profile?.skills?.includes('Machine Learning') ? 75 : 20, fullMark: 100 },
-    { subject: 'Data', A: profile?.skills?.includes('Power BI') || profile?.skills?.includes('Python') ? 85 : 30, fullMark: 100 },
-    { subject: 'DSA', A: profile?.skills?.includes('DSA') ? 70 : 40, fullMark: 100 },
-  ];
 
   if (loading) {
     return (
@@ -67,6 +43,56 @@ export default function DashboardPage() {
       </div>
     );
   }
+
+  if (!metrics) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center flex-col text-center">
+        <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
+        <h2 className="text-2xl font-bold">Failed to load Dashboard</h2>
+        <p className="text-foreground/60 mt-2">Please try refreshing the page or check your connection.</p>
+      </div>
+    );
+  }
+
+  const {
+    profile,
+    profile_strength,
+    missing_sections,
+    readiness_score,
+    readiness_status,
+    career_insight,
+    market_alignment,
+    market_trend,
+    top_skill_gap,
+    roadmap_percentage,
+    roadmap_progress,
+    mock_interview,
+    resume_intelligence,
+    github_intelligence,
+    activities
+  } = metrics;
+
+  const displayName = profile?.name || "Explorer";
+  const targetRole = profile?.targetRole || "Tech Professional";
+
+  // Dynamic radar data mapping profile skills to categories
+  const radarData = [
+    { subject: 'Frontend', A: profile?.skills?.some((s: string) => ['React', 'Vue', 'Angular', 'HTML', 'CSS', 'JS', 'TypeScript'].includes(s)) ? 90 : 20, fullMark: 100 },
+    { subject: 'Backend', A: profile?.skills?.some((s: string) => ['Node', 'Flask', 'Django', 'Spring', 'Go'].includes(s)) ? 85 : 20, fullMark: 100 },
+    { subject: 'Database', A: profile?.skills?.some((s: string) => ['SQL', 'Mongo', 'Postgres'].includes(s)) ? 80 : 20, fullMark: 100 },
+    { subject: 'AI/ML', A: profile?.skills?.some((s: string) => ['Machine Learning', 'Python', 'TensorFlow', 'PyTorch'].includes(s)) ? 75 : 20, fullMark: 100 },
+    { subject: 'Cloud', A: profile?.skills?.some((s: string) => ['AWS', 'GCP', 'Azure', 'Docker'].includes(s)) ? 70 : 20, fullMark: 100 },
+    { subject: 'DSA', A: profile?.skills?.some((s: string) => ['DSA', 'Algorithms'].includes(s)) ? 70 : 20, fullMark: 100 },
+  ];
+
+  const quickActions = [
+    { title: "Resume Analyzer", status: resume_intelligence ? `ATS: ${resume_intelligence.ats_score}%` : "Upload Resume", icon: FileText, color: "text-blue-500", bg: "bg-blue-500/10", href: "/resume" },
+    { title: "AI Mock Interview", status: mock_interview ? `Score: ${mock_interview.latest_score}` : "Start Interview", icon: Briefcase, color: "text-purple-500", bg: "bg-purple-500/10", href: "/mock-interview" },
+    { title: "AI Roadmap", status: roadmap_progress ? `${roadmap_progress.completed_milestones}/${roadmap_progress.total_milestones} Done` : "Generate Path", icon: MapIcon, color: "text-green-500", bg: "bg-green-500/10", href: "/roadmap" },
+    { title: "GitHub Analyzer", status: github_intelligence?.connected ? "Connected" : "Not Connected", icon: Code, color: "text-gray-400", bg: "bg-gray-500/10", href: "/profile" },
+    { title: "Skill Gap Analysis", status: `${missing_sections.length} Gaps`, icon: Target, color: "text-orange-500", bg: "bg-orange-500/10", href: "/profile" },
+    { title: "Placement Tracker", status: "Coming Soon", icon: Activity, color: "text-red-500", bg: "bg-red-500/10", href: "/dashboard" },
+  ];
 
   return (
     <div className="space-y-8 relative pb-20 overflow-hidden">
@@ -80,55 +106,80 @@ export default function DashboardPage() {
         variants={fadeIn}
         initial="hidden"
         animate="visible"
-        className="relative z-10 p-8 md:p-10 rounded-3xl bg-card/40 backdrop-blur-xl border border-white/10 shadow-2xl overflow-hidden group"
+        className="relative z-10 p-8 md:p-10 rounded-3xl bg-white/[0.85] dark:bg-white/[0.04] backdrop-blur-xl border border-white/10 shadow-2xl overflow-hidden group"
       >
-        <div className="absolute inset-0 bg-gradient-to-r from-accent-blue/10 to-accent-purple/10 opacity-50 group-hover:opacity-70 transition-opacity duration-700" />
+        <div className="absolute inset-0 bg-gradient-to-r from-accent-blue/5 to-accent-purple/5 opacity-50 transition-opacity duration-700" />
 
-        <div className="relative flex flex-col md:flex-row items-center gap-8">
-          {/* Avatar & Badges */}
-          <div className="relative">
-            <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-accent-blue to-accent-purple p-1">
-              <div className="w-full h-full rounded-xl bg-background overflow-hidden">
-                {user?.photoURL ? (
-                  <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-3xl font-bold bg-accent-blue/20 text-accent-blue">
-                    {displayName.charAt(0)}
-                  </div>
-                )}
-              </div>
+        <div className="relative flex flex-col gap-8">
+          
+          {/* Header */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2 text-accent-blue font-semibold tracking-wide uppercase text-xs mb-1">
+              <Sparkles className="w-4 h-4" />
+              AI Career Intelligence
             </div>
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.5, type: "spring" }}
-              className="absolute -bottom-2 -right-2 bg-background p-1.5 rounded-full border border-border shadow-lg"
-            >
-              <div className="bg-orange-500/20 p-1.5 rounded-full">
-                <Zap className="w-4 h-4 text-orange-500 fill-orange-500" />
-              </div>
-            </motion.div>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight flex flex-wrap items-center gap-3">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-foreground to-foreground/70">
+                Welcome back, {displayName}
+              </span>
+              <span>👋</span>
+            </h1>
+            <p className="text-lg text-foreground/70 font-medium max-w-3xl mt-1">
+              {career_insight}
+            </p>
           </div>
 
-          {/* Greeting Text */}
-          <div className="flex-1 text-center md:text-left">
-            <h1 className="text-4xl md:text-5xl font-bold mb-2 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70">
-              Welcome back, {displayName} 👋
-            </h1>
-            <p className="text-lg text-foreground/70 font-medium">
-              You&apos;re progressing beautifully toward becoming a <span className="text-accent-blue font-bold">{targetRole}</span>.
-            </p>
-            <div className="mt-4 flex flex-wrap items-center justify-center md:justify-start gap-3">
-              <span className="px-3 py-1 rounded-full bg-accent-blue/10 border border-accent-blue/20 text-accent-blue text-sm font-medium">
-                {profile?.experienceLevel || "Level 1"}
-              </span>
-              <span className="px-3 py-1 rounded-full bg-accent-purple/10 border border-accent-purple/20 text-accent-purple text-sm font-medium">
-                {profile?.preferredDomain || "Tech Domain"}
-              </span>
-              <span className="px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-green-500 text-sm font-medium">
-                Profile Complete
-              </span>
+          {/* 6-Grid Metrics Display */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            
+            {/* Current Position */}
+            <div className="p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-border/50">
+              <p className="text-xs text-foreground/50 font-medium uppercase mb-1">Current Position</p>
+              <p className="text-sm font-semibold leading-tight break-words" title={profile.currentPosition}>{profile.currentPosition}</p>
             </div>
+
+            {/* Target Role */}
+            <div className="p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-border/50">
+              <p className="text-xs text-foreground/50 font-medium uppercase mb-1">Target Role</p>
+              <p className="text-sm font-semibold leading-tight break-words text-accent-blue" title={profile.targetRole}>{profile.targetRole}</p>
+            </div>
+
+            {/* Career Readiness */}
+            <div className="p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-border/50 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-16 h-16 bg-accent-blue/10 rounded-full blur-xl" />
+              <p className="text-xs text-foreground/50 font-medium uppercase mb-1">Career Readiness</p>
+              <div className="flex items-end gap-2">
+                <span className="text-2xl font-bold">{readiness_score > 0 ? `${readiness_score}%` : 'N/A'}</span>
+              </div>
+              <p className="text-[10px] text-foreground/50 mt-0.5">{readiness_score > 0 ? readiness_status : 'Not Available'}</p>
+            </div>
+
+            {/* Market Alignment */}
+            <div className="p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-border/50 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-16 h-16 bg-accent-purple/10 rounded-full blur-xl" />
+              <p className="text-xs text-foreground/50 font-medium uppercase mb-1">Market Match</p>
+              <div className="flex items-end gap-2">
+                <span className="text-2xl font-bold">{readiness_score > 0 ? `${market_alignment}%` : 'N/A'}</span>
+              </div>
+              <p className="text-[10px] text-foreground/50 mt-0.5">{readiness_score > 0 ? market_trend : 'Generate Roadmap'}</p>
+            </div>
+
+            {/* Top Skill Gap */}
+            <div className="p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-border/50">
+              <p className="text-xs text-foreground/50 font-medium uppercase mb-1">Top Skill Gap</p>
+              <p className="text-sm font-semibold leading-tight break-words text-orange-500" title={top_skill_gap}>{top_skill_gap}</p>
+            </div>
+
+            {/* Roadmap Progress */}
+            <div className="p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-border/50 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-16 h-16 bg-green-500/10 rounded-full blur-xl" />
+              <p className="text-xs text-foreground/50 font-medium uppercase mb-1">Roadmap Progress</p>
+              <div className="flex items-end gap-2">
+                <span className="text-2xl font-bold">{roadmap_percentage > 0 ? `${roadmap_percentage}%` : 'N/A'}</span>
+              </div>
+              <p className="text-[10px] text-foreground/50 mt-0.5">{roadmap_percentage > 0 ? `Phase ${roadmap_progress?.completed_milestones + 1}` : 'Not Started'}</p>
+            </div>
+
           </div>
         </div>
       </motion.div>
@@ -141,10 +192,10 @@ export default function DashboardPage() {
         className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6"
       >
         {[
-          { label: "Profile Strength", value: "100%", trend: "+100%", icon: CheckCircle2, color: "text-green-400", border: "hover:border-green-400/30", glow: "group-hover:shadow-[0_0_20px_rgba(74,222,128,0.15)]" },
-          { label: "Skills Logged", value: profile?.skills?.length || 0, trend: "New", icon: BookOpen, color: "text-accent-blue", border: "hover:border-accent-blue/30", glow: "group-hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]" },
-          { label: "Readiness", value: "TBD", trend: "Needs Resume", icon: Target, color: "text-orange-400", border: "hover:border-orange-400/30", glow: "group-hover:shadow-[0_0_20px_rgba(251,146,60,0.15)]" },
-          { label: "Consistency", value: "Day 1", trend: "Streak Started", icon: Activity, color: "text-accent-purple", border: "hover:border-accent-purple/30", glow: "group-hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]" }
+          { label: "Profile Strength", value: `${profile_strength}%`, trend: missing_sections.length ? `${missing_sections.length} Action(s) Needed` : "All Complete", icon: CheckCircle2, color: profile_strength === 100 ? "text-green-400" : "text-yellow-400", border: profile_strength === 100 ? "hover:border-green-400/30" : "hover:border-yellow-400/30", glow: profile_strength === 100 ? "group-hover:shadow-[0_0_20px_rgba(74,222,128,0.15)]" : "group-hover:shadow-[0_0_20px_rgba(250,204,21,0.15)]" },
+          { label: "Career Readiness", value: `${readiness_score}%`, trend: readiness_status, icon: Target, color: readiness_score >= 80 ? "text-accent-blue" : "text-orange-400", border: readiness_score >= 80 ? "hover:border-accent-blue/30" : "hover:border-orange-400/30", glow: readiness_score >= 80 ? "group-hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]" : "group-hover:shadow-[0_0_20px_rgba(251,146,60,0.15)]" },
+          { label: "AI Market Fit", value: `${market_alignment}%`, trend: market_trend, icon: TrendingUp, color: "text-accent-purple", border: "hover:border-accent-purple/30", glow: "group-hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]" },
+          { label: "Mock Interview Avg", value: mock_interview ? mock_interview.average_score : "N/A", trend: mock_interview ? `Best: ${mock_interview.best_score}` : "Not Taken", icon: Briefcase, color: "text-green-400", border: "hover:border-green-400/30", glow: "group-hover:shadow-[0_0_20px_rgba(74,222,128,0.15)]" }
         ].map((stat, i) => (
           <motion.div
             key={i}
@@ -161,7 +212,7 @@ export default function DashboardPage() {
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-bold text-foreground">{stat.value}</span>
               </div>
-              <p className={`text-xs mt-1 ${stat.trend.includes('+') || stat.trend === 'New' ? 'text-green-400' : 'text-foreground/50'}`}>
+              <p className={`text-xs mt-1 ${['All Complete', 'Interview Ready', 'High Demand'].includes(stat.trend) ? 'text-green-400' : 'text-foreground/50'}`}>
                 {stat.trend}
               </p>
             </div>
@@ -181,17 +232,26 @@ export default function DashboardPage() {
               <Target className="w-5 h-5 text-accent-purple" />
               Skill Distribution
             </h3>
-            <p className="text-sm text-foreground/60 mb-6">Your current competency across domains</p>
+            <p className="text-sm text-foreground/60 mb-6">Generated from your profile data</p>
             <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
-                  <PolarGrid stroke="var(--color-border)" />
-                  <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--color-foreground)', opacity: 0.7, fontSize: 12 }} />
-                  <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                  <Radar name="Skills" dataKey="A" stroke="var(--color-accent-blue)" fill="var(--color-accent-blue)" fillOpacity={0.4} />
-                  <Tooltip contentStyle={{ backgroundColor: 'var(--color-card)', borderColor: 'var(--color-border)', borderRadius: '12px' }} />
-                </RadarChart>
-              </ResponsiveContainer>
+              {profile.skills?.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+                    <PolarGrid stroke="var(--color-border)" />
+                    <PolarAngleAxis dataKey="subject" tick={{ fill: 'var(--color-foreground)', opacity: 0.7, fontSize: 12 }} />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                    <Radar name="Skills" dataKey="A" stroke="var(--color-accent-blue)" fill="var(--color-accent-blue)" fillOpacity={0.4} />
+                    <Tooltip contentStyle={{ backgroundColor: 'var(--color-card)', borderColor: 'var(--color-border)', borderRadius: '12px' }} />
+                  </RadarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center border-2 border-dashed border-border rounded-xl">
+                  <p className="text-foreground/50 mb-4">No skills mapped. Update your profile.</p>
+                  <Link href="/profile" className="px-4 py-2 bg-accent-blue text-white font-semibold rounded-full hover:bg-accent-blue/90">
+                    Add Skills
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
 
@@ -200,26 +260,26 @@ export default function DashboardPage() {
             <div className="absolute inset-0 bg-gradient-to-b from-accent-purple/5 to-transparent opacity-50" />
             <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-accent-blue" />
-              AI Career Insights
+              Actionable Insights
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
               {[
-                { title: "Skill Growth", desc: `Your ${profile?.skills?.[0] || 'core'} skill growth is accelerating based on targets.`, delay: 0.1 },
-                { title: "Resume Status", desc: "Upload your resume to unlock ATS optimization insights.", delay: 0.2 },
-                { title: "Market Fit", desc: `High demand detected for ${targetRole}s in ${profile?.preferredDomain || 'your sector'}.`, delay: 0.3 }
+                { title: "Missing Sections", desc: missing_sections.length > 0 ? `Complete: ${missing_sections.join(", ")}` : "Profile fully optimized.", delay: 0.1 },
+                { title: "Resume ATS", desc: resume_intelligence ? `Scored ${resume_intelligence.ats_score}%. ${resume_intelligence.missing_keywords?.length > 0 ? 'Missing keywords detected.' : 'Looks strong!'}` : "Upload resume to unlock ATS insights.", delay: 0.2 },
+                { title: "GitHub Sync", desc: github_intelligence?.connected ? "GitHub connected. Activity is contributing to readiness score." : "Connect GitHub to improve Market Fit score.", delay: 0.3 }
               ].map((insight, i) => (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: insight.delay }}
                   key={i}
-                  className="p-4 rounded-xl bg-background/50 border border-border/50 hover:border-accent-blue/40 transition-colors"
+                  className="p-4 rounded-xl bg-background/50 border border-border/50 hover:border-accent-blue/40 transition-colors flex flex-col h-full"
                 >
                   <div className="w-8 h-8 rounded-full bg-accent-blue/10 flex items-center justify-center mb-3">
                     <Sparkles className="w-4 h-4 text-accent-blue" />
                   </div>
                   <h4 className="font-semibold text-sm mb-1">{insight.title}</h4>
-                  <p className="text-xs text-foreground/60 leading-relaxed">{insight.desc}</p>
+                  <p className="text-xs text-foreground/60 leading-relaxed flex-1">{insight.desc}</p>
                 </motion.div>
               ))}
             </div>
@@ -235,47 +295,70 @@ export default function DashboardPage() {
               <MapIcon className="w-5 h-5 text-green-400" />
               Path to {targetRole}
             </h3>
-            <p className="text-sm text-foreground/60 mb-6">Milestone progression</p>
+            <p className="text-sm text-foreground/60 mb-6">Generated AI Roadmap</p>
 
-            <div className="relative pl-6 space-y-6 before:absolute before:inset-0 before:ml-[11px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
-              {[
-                { title: "Foundations", status: "completed" },
-                { title: "Advanced Concepts", status: "current" },
-                { title: "Portfolio Building", status: "upcoming" },
-                { title: "Interview Prep", status: "upcoming" }
-              ].map((step, i) => (
-                <div key={i} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                  <div className={`flex items-center justify-center w-6 h-6 rounded-full border-2 bg-background absolute -left-[35px] ${step.status === 'completed' ? 'border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]' :
-                    step.status === 'current' ? 'border-accent-blue shadow-[0_0_10px_rgba(59,130,246,0.4)]' :
-                      'border-border'
-                    }`}>
-                    {step.status === 'completed' && <div className="w-2 h-2 bg-green-500 rounded-full" />}
-                    {step.status === 'current' && <div className="w-2 h-2 bg-accent-blue rounded-full animate-pulse" />}
+            {roadmap_progress ? (
+              <div className="relative pl-6 space-y-6 before:absolute before:inset-0 before:ml-[11px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
+                {[
+                  { title: `Completed (${roadmap_progress.completed_milestones})`, status: "completed" },
+                  { title: roadmap_progress.current_phase, status: "current" },
+                  { title: `Remaining (${roadmap_progress.remaining_milestones})`, status: "upcoming" }
+                ].map((step, i) => (
+                  <div key={i} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                    <div className={`flex items-center justify-center w-6 h-6 rounded-full border-2 bg-background absolute -left-[35px] md:-left-3 ${step.status === 'completed' ? 'border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)]' :
+                      step.status === 'current' ? 'border-accent-blue shadow-[0_0_10px_rgba(59,130,246,0.4)]' :
+                        'border-border'
+                      }`}>
+                      {step.status === 'completed' && <div className="w-2 h-2 bg-green-500 rounded-full" />}
+                      {step.status === 'current' && <div className="w-2 h-2 bg-accent-blue rounded-full animate-pulse" />}
+                    </div>
+                    <div className="bg-background/50 border border-border/50 p-3 rounded-lg w-full group-hover:border-accent-blue/30 transition-colors">
+                      <h4 className={`text-sm font-medium ${step.status === 'upcoming' ? 'text-foreground/50' : 'text-foreground'}`}>
+                        {step.title}
+                      </h4>
+                    </div>
                   </div>
-                  <div className="bg-background/50 border border-border/50 p-3 rounded-lg w-full group-hover:border-accent-blue/30 transition-colors">
-                    <h4 className={`text-sm font-medium ${step.status === 'upcoming' ? 'text-foreground/50' : 'text-foreground'}`}>
-                      {step.title}
-                    </h4>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-6 flex flex-col items-center justify-center text-center">
+                <p className="text-foreground/50 mb-4 text-sm">You haven't generated your personalized learning roadmap yet.</p>
+                <Link href="/roadmap" className="px-4 py-2 bg-green-500/10 text-green-500 border border-green-500/30 rounded-lg font-medium hover:bg-green-500/20 transition-colors text-sm">
+                  Generate AI Roadmap
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Activity Feed */}
           <div className="p-6 rounded-2xl bg-card/40 backdrop-blur-md border border-white/5">
             <h3 className="text-lg font-bold mb-4">Recent Activity</h3>
-            <div className="space-y-4">
-              {activityFeed.map((activity, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <div className={`mt-1 w-2 h-2 rounded-full ${activity.active ? 'bg-accent-blue shadow-[0_0_8px_rgba(59,130,246,0.5)]' : 'bg-border'}`} />
-                  <div>
-                    <p className={`text-sm font-medium ${activity.active ? 'text-foreground' : 'text-foreground/60'}`}>{activity.title}</p>
-                    <p className="text-xs text-foreground/40">{activity.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {activities?.length > 0 ? (
+              <div className="space-y-4">
+                {activities.map((activity: any, i: number) => {
+                  let timeAgo = "Recently";
+                  try {
+                    if (activity.timestamp) {
+                      timeAgo = formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true });
+                    }
+                  } catch (e) {}
+                  
+                  return (
+                    <div key={i} className="flex items-start gap-3">
+                      <div className={`mt-1 w-2 h-2 rounded-full bg-accent-blue shadow-[0_0_8px_rgba(59,130,246,0.5)]`} />
+                      <div>
+                        <p className={`text-sm font-medium text-foreground`}>{activity.title}</p>
+                        <p className="text-xs text-foreground/40">{timeAgo}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="py-8 text-center text-foreground/50 text-sm">
+                No recent activity found. Explore the platform!
+              </div>
+            )}
           </div>
         </motion.div>
       </div>
@@ -284,21 +367,25 @@ export default function DashboardPage() {
       <motion.div variants={slideUp} className="p-6 rounded-2xl bg-card/40 backdrop-blur-md border border-white/5">
         <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
           <Zap className="w-5 h-5 text-accent-blue" />
-          Quick Actions
+          Quick Actions & Status
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {quickActions.map((action, i) => (
-            <motion.button
-              key={i}
-              whileHover={{ y: -4, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="flex flex-col items-center text-center p-4 rounded-xl bg-background/50 border border-border/50 hover:border-accent-blue/40 hover:bg-accent-blue/5 transition-all group"
-            >
-              <div className={`p-3 rounded-full ${action.bg} ${action.color} mb-3 group-hover:scale-110 transition-transform`}>
-                <action.icon className="w-5 h-5" />
-              </div>
-              <span className="text-xs font-semibold">{action.title}</span>
-            </motion.button>
+            <Link key={i} href={action.href}>
+              <motion.button
+                whileHover={{ y: -4, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full h-full flex flex-col items-center justify-between text-center p-4 rounded-xl bg-background/50 border border-border/50 hover:border-accent-blue/40 hover:bg-accent-blue/5 transition-all group"
+              >
+                <div className={`p-3 rounded-full ${action.bg} ${action.color} mb-3 group-hover:scale-110 transition-transform`}>
+                  <action.icon className="w-5 h-5" />
+                </div>
+                <div className="flex flex-col items-center justify-end flex-1">
+                  <span className="text-sm font-semibold mb-1">{action.title}</span>
+                  <span className="text-[10px] text-foreground/50 font-medium px-2 py-0.5 rounded-full bg-foreground/5">{action.status}</span>
+                </div>
+              </motion.button>
+            </Link>
           ))}
         </div>
       </motion.div>

@@ -29,8 +29,13 @@ def handle_onboarding():
         return jsonify({"error": f"Missing fields: {', '.join(missing)}"}), 400
 
     try:
+        from services.activity_service import log_activity
         user_doc = upsert_onboarding(data)
         if user_doc and "_id" in user_doc: user_doc["_id"] = str(user_doc["_id"])
+        
+        # Log activity
+        log_activity(data["uid"], "Profile Updated", "profile")
+        
         return jsonify({"message": "Onboarding saved", "user": user_doc}), 200
     except Exception as e:
         current_app.logger.error(f"Onboarding error: {e}")

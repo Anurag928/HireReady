@@ -1,10 +1,15 @@
 import logging
 from datetime import datetime, timezone
-from services.mongo_service import db
+from services.mongo_service import get_collection
 from services.ai_resume_service import analyze_resume
 
-resumes_collection = db["resumes"]
-resume_history_collection = db["resume_history"]
+
+def _resumes_collection():
+    return get_collection("resumes")
+
+
+def _resume_history_collection():
+    return get_collection("resume_history")
 
 from typing import Optional
 
@@ -31,7 +36,7 @@ def process_and_store_resume(uid: str, resume_text: str, target_role: str, job_d
         }
 
     # Determine version
-    existing = resumes_collection.find_one({"uid": uid})
+    existing = _resumes_collection().find_one({"uid": uid})
     version = 1
     if existing and "version" in existing:
         version = existing["version"] + 1
@@ -61,7 +66,7 @@ def process_and_store_resume(uid: str, resume_text: str, target_role: str, job_d
     logging.info("[Storage Service] Saving resume to MongoDB...")
     
     # Upsert the active resume
-    resumes_collection.replace_one(
+    _resumes_collection().replace_one(
         {"uid": uid}, 
         resume_doc, 
         upsert=True
@@ -70,23 +75,23 @@ def process_and_store_resume(uid: str, resume_text: str, target_role: str, job_d
     # Save to history collection
     history_doc = resume_doc.copy()
     history_doc.pop("_id", None)
-    resume_history_collection.insert_one(history_doc)
+    _resume_history_collection().insert_one(history_doc)
     
     # Return document
-    saved_resume = resumes_collection.find_one({"uid": uid})
+    saved_resume = _resumes_collection().find_one({"uid": uid})
     if saved_resume and "_id" in saved_resume:
         saved_resume["_id"] = str(saved_resume["_id"])
         
     return saved_resume
 
 def get_latest_resume(uid: str) -> Optional[dict]:
-    doc = resumes_collection.find_one({"uid": uid})
+    doc = _resumes_collection().find_one({"uid": uid})
     if doc and "_id" in doc:
         doc["_id"] = str(doc["_id"])
     return doc
 
 def get_resume_history(uid: str) -> list:
-    history_cursor = resume_history_collection.find({"uid": uid}).sort("upload_date", -1)
+    history_cursor = _resume_history_collection().find({"uid": uid}).sort("upload_date", -1)
     history = []
     for doc in history_cursor:
         doc["_id"] = str(doc["_id"])

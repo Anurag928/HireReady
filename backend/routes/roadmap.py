@@ -1,6 +1,6 @@
 from flask import Blueprint, request, current_app
 from services.roadmap_service import create_and_store_roadmap, get_roadmap_history, get_roadmap_version
-from services.mongo_service import db
+from services.mongo_service import get_collection
 from utils.response import success_response, error_response
 
 roadmap_bp = Blueprint('roadmap', __name__)
@@ -16,7 +16,12 @@ def generate_roadmap_route():
     strategy_mode = data.get("strategy_mode", None)
     
     try:
+        from services.activity_service import log_activity
         roadmap = create_and_store_roadmap(uid, force_regenerate=force_regenerate, strategy_mode=strategy_mode)
+        
+        # Log activity
+        log_activity(uid, "Roadmap Generated", "roadmap")
+        
         return success_response(data={"roadmap": roadmap}, message="Roadmap generated successfully")
     except Exception as e:
         import json
@@ -75,7 +80,7 @@ def test_gemini_route():
 @roadmap_bp.route('/roadmap/<uid>', methods=['GET'])
 def get_roadmap_route(uid):
     try:
-        roadmaps_collection = db["roadmaps"]
+        roadmaps_collection = get_collection("roadmaps")
         roadmap = roadmaps_collection.find_one({"uid": uid})
         if not roadmap:
             return error_response("Roadmap not found", 404)
