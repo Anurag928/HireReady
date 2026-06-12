@@ -9,6 +9,11 @@ export const onboardingService = {
     try {
       const payload = {
         uid,
+        full_name: (profileData as any).fullName || "",
+        college: (profileData as any).college || "",
+        graduation_year: (profileData as any).graduationYear || "",
+        current_status: (profileData as any).currentStatus || "",
+        education: (profileData as any).education || "",
         role: profileData.role || "",
         experience_level: profileData.experienceLevel || "",
         skills: profileData.skills || [],

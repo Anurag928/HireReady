@@ -14,17 +14,22 @@ export function Navbar() {
   const background = useTransform(
     scrollY,
     [0, 50],
-    ["rgba(var(--background), 0)", "rgba(var(--background), 0.7)"]
+    ["rgba(var(--background), 0.1)", "rgba(var(--background), 0.8)"]
   );
   const backdropFilter = useTransform(
     scrollY,
     [0, 50],
-    ["blur(0px)", "blur(12px)"]
+    ["blur(8px)", "blur(24px)"]
   );
   const borderBottom = useTransform(
     scrollY,
     [0, 50],
-    ["1px solid transparent", "1px solid var(--border)"]
+    ["1px solid rgba(255,255,255,0.05)", "1px solid rgba(255,255,255,0.1)"]
+  );
+  const boxShadow = useTransform(
+    scrollY,
+    [0, 50],
+    ["none", "0 10px 30px -10px rgba(0,0,0,0.2)"]
   );
 
   const navLinks = [
@@ -39,6 +44,7 @@ export function Navbar() {
         background: background as unknown as string,
         backdropFilter: backdropFilter as unknown as string,
         borderBottom: borderBottom as unknown as string,
+        boxShadow: boxShadow as unknown as string,
       }}
       className="fixed top-0 left-0 right-0 z-50 transition-colors duration-300"
     >

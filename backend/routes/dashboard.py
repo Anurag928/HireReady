@@ -117,7 +117,7 @@ def get_dashboard_metrics(uid):
 
         # Current Position
         current_position = user.get("role") or "Building Profile"
-        if current_position == "student": current_position = f"Aspiring {user.get('targetRole', 'Professional')}"
+        if current_position == "student": current_position = f"Aspiring {user.get('targetRole', 'Not Selected')}"
 
         # Roadmap Percentage
         roadmap_percentage = 0
@@ -142,7 +142,7 @@ def get_dashboard_metrics(uid):
             "profile": {
                 "name": user.get("name") or user.get("displayName", "Explorer"),
                 "currentPosition": current_position,
-                "targetRole": user.get("targetRole", "Tech Professional"),
+                "targetRole": user.get("targetRole", "Not Selected"),
                 "experienceLevel": user.get("experienceLevel", "Level 1"),
                 "preferredDomain": user.get("preferredDomain", "Tech Domain"),
                 "skills": skills

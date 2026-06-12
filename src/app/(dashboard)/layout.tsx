@@ -153,6 +153,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const isMockInterviewRoute = pathname.startsWith("/mock-interview");
 
   const isDemo = true;
+
+  useEffect(() => {
+    // Force redirect if user is authenticated but hasn't completed onboarding
+    if (authInitialized && user && dbUser && dbUser.onboarding_completed === false) {
+      router.replace("/onboarding");
+    }
+  }, [authInitialized, user, dbUser, router]);
+
   if (!authInitialized && !isDemo) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -168,6 +176,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </div>
     );
+  }
+
+  // Prevent rendering dashboard content if they are being redirected
+  if (authInitialized && user && dbUser && dbUser.onboarding_completed === false) {
+    return null;
   }
 
   return (

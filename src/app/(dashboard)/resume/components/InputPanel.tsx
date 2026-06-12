@@ -20,8 +20,8 @@ export function InputPanel({ onStart, onSelfTest, isAnalyzing, isDebugMode }: Pr
   const [resumeText, setResumeText] = useState("");
 
   const startAnalysis = async () => {
-    const finalResume = resumeText.trim() || "I am a developer who builds web applications. I have made a portfolio website and a basic e-commerce project using React and Node.js. I know HTML, CSS, JavaScript and I am learning backend development. Education: Bachelor of Computer Science";
-    const finalRole = targetRole.trim() || "Full Stack Developer";
+    const finalResume = resumeText.trim();
+    const finalRole = targetRole.trim();
     const finalJD = jobDescription.trim() || "React, Node.js, Express, MongoDB, REST APIs, Git, Deployment, AWS (optional)";
 
     const payload = { 
@@ -119,7 +119,7 @@ export function InputPanel({ onStart, onSelfTest, isAnalyzing, isDebugMode }: Pr
           
           <button
             onClick={() => onStart({ targetRole, jobDescription, resumeText, startAnalysis })}
-            disabled={isAnalyzing}
+            disabled={isAnalyzing || !targetRole.trim() || !resumeText.trim()}
             className="group relative px-20 py-8 rounded-2xl bg-blue-600 dark:bg-cyan-500/20 text-white dark:text-cyan-200 border border-transparent dark:border-cyan-500/30 font-black uppercase tracking-[0.4em] text-[14px] hover:scale-105 active:scale-95 transition-all duration-500 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed overflow-hidden shadow-[0_10px_40px_rgba(37,99,235,0.3)] dark:shadow-2xl flex items-center gap-6"
           >
             <span className="relative z-10">{isAnalyzing ? "Analyzing Resume..." : "Generate Insights"}</span>

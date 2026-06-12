@@ -28,6 +28,11 @@ def upsert_onboarding(data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
 
     # Prepare fields to set
     onboarding_fields = {
+        "full_name": data.get("full_name"),
+        "college": data.get("college"),
+        "graduation_year": data.get("graduation_year"),
+        "current_status": data.get("current_status"),
+        "education": data.get("education"),
         "role": data.get("role"),
         "experience_level": data.get("experience_level"),
         "skills": data.get("skills"),

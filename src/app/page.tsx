@@ -8,6 +8,7 @@ import {
 import Link from "next/link";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
+import { OrbSystem } from "@/components/landing/OrbSystem";
 import { slideUp, staggerContainer, fadeIn } from "@/animations";
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, 
@@ -25,7 +26,8 @@ const analyticsData = [
 export default function LandingPage() {
   
   return (
-    <div className="bg-background text-foreground overflow-hidden">
+    <div className="bg-gradient-to-br from-[#f8fafc] via-[#eef2ff] to-[#ffffff] dark:from-[#020617] dark:via-[#050816] dark:to-[#0f172a] text-foreground overflow-hidden min-h-screen relative">
+      <OrbSystem />
       <Navbar />
       
       <main className="flex-1 pt-20">
@@ -43,7 +45,7 @@ export default function LandingPage() {
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
-            className="max-w-5xl mx-auto relative z-10"
+            className="max-w-5xl mx-auto relative z-10 animate-float"
           >
             <motion.div variants={slideUp} className="mb-6 inline-flex items-center gap-2 px-5 py-2 rounded-full bg-background/50 backdrop-blur-md border border-accent-blue/30 text-accent-blue text-sm font-medium shadow-[0_0_20px_rgba(59,130,246,0.15)]">
               <Sparkles className="w-4 h-4" />
@@ -52,10 +54,11 @@ export default function LandingPage() {
             
             <motion.h1 
               variants={slideUp}
-              className="text-6xl md:text-8xl font-bold tracking-tighter mb-8 leading-[1.1]"
+              className="text-6xl md:text-8xl font-bold tracking-tighter mb-8 leading-[1.1] relative"
             >
+              <div className="absolute inset-0 blur-xl opacity-20 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 z-[-1]" />
               Your AI-Powered <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-purple via-accent-blue to-accent-purple animate-gradient-x">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 animate-gradient-x relative z-10">
                 Placement Companion
               </span>
             </motion.h1>
@@ -73,7 +76,7 @@ export default function LandingPage() {
             >
               <Link
                 href="/login"
-                className="group relative px-8 py-4 bg-foreground text-background font-semibold rounded-full hover:scale-105 transition-all shadow-[0_0_30px_rgba(255,255,255,0.1)] w-full sm:w-auto overflow-hidden"
+                className="group relative px-8 py-4 bg-foreground text-background font-semibold rounded-full hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:shadow-[0_0_40px_rgba(59,130,246,0.3)] w-full sm:w-auto overflow-hidden"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-accent-blue to-accent-purple opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <span className="relative flex items-center justify-center gap-2 group-hover:text-white transition-colors">
@@ -83,8 +86,9 @@ export default function LandingPage() {
               
               <Link
                 href="/login"
-                className="px-8 py-4 rounded-full font-semibold text-foreground bg-card/50 backdrop-blur-sm border border-border hover:bg-card hover:border-accent-blue/50 flex items-center justify-center gap-3 transition-all hover:scale-105 w-full sm:w-auto group"
+                className="px-8 py-4 rounded-full font-semibold text-foreground bg-card/50 backdrop-blur-sm border border-border hover:bg-card hover:border-accent-blue/50 flex items-center justify-center gap-3 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] hover:shadow-[0_0_30px_rgba(59,130,246,0.2)] w-full sm:w-auto group relative overflow-hidden"
               >
+                <div className="absolute inset-0 bg-gradient-to-r from-foreground/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <svg className="w-5 h-5 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                   <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -116,11 +120,11 @@ export default function LandingPage() {
               ].map((feature, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 40 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className="group p-8 rounded-3xl bg-card/30 backdrop-blur-sm border border-white/10 hover:border-accent-blue/40 transition-all hover:-translate-y-2 relative overflow-hidden"
+                  transition={{ duration: 0.7, delay: i * 0.1 }}
+                  className="group p-8 rounded-3xl bg-card/30 backdrop-blur-xl border border-white/10 hover:border-accent-blue/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(59,130,246,0.15)] relative overflow-hidden"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-accent-blue/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   <div className="w-14 h-14 rounded-2xl bg-background/50 border border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform shadow-lg">
@@ -158,12 +162,12 @@ export default function LandingPage() {
                   { level: "Advanced", title: "Next.js & Server Components", status: "upcoming" }
                 ].map((node, i) => (
                   <motion.div 
-                    initial={{ opacity: 0, x: 20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
+                    initial={{ opacity: 0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: i * 0.2 }}
+                    transition={{ duration: 0.7, delay: i * 0.2 }}
                     key={i} 
-                    className="relative pl-24"
+                    className="relative pl-24 group"
                   >
                      <div className="absolute left-8 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-background border-4 border-card flex items-center justify-center z-10">
                        {node.status === 'completed' && <div className="w-3 h-3 bg-green-500 rounded-full" />}
@@ -203,8 +207,8 @@ export default function LandingPage() {
               <div className="absolute inset-0 bg-gradient-to-br from-accent-purple/10 to-transparent pointer-events-none" />
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart cx="50%" cy="50%" outerRadius="70%" data={analyticsData}>
-                  <PolarGrid stroke="rgba(255,255,255,0.1)" />
-                  <PolarAngleAxis dataKey="subject" tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 12 }} />
+                  <PolarGrid stroke="var(--foreground)" strokeOpacity={0.1} />
+                  <PolarAngleAxis dataKey="subject" tick={{ fill: "var(--foreground)", opacity: 0.5, fontSize: 12 }} />
                   <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
                   <Radar name="Skills" dataKey="A" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.4} />
                 </RadarChart>
@@ -227,12 +231,12 @@ export default function LandingPage() {
                 { step: "03", title: "Get Your Roadmap", desc: "Receive your personalized dashboard and actionable career insights." }
               ].map((item, i) => (
                 <motion.div 
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 40 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.2 }}
+                  transition={{ duration: 0.7, delay: i * 0.2 }}
                   key={i} 
-                  className="relative z-10 flex flex-col items-center"
+                  className="relative z-10 flex flex-col items-center group"
                 >
                   <div className="w-24 h-24 rounded-full bg-background border border-accent-blue/30 flex items-center justify-center text-3xl font-bold text-accent-blue mb-6 shadow-[0_0_30px_rgba(59,130,246,0.15)]">
                     {item.step}
@@ -254,9 +258,10 @@ export default function LandingPage() {
             <h2 className="text-5xl md:text-7xl font-bold mb-8">Start Building Your<br/>AI Career Future</h2>
             <Link
               href="/login"
-              className="inline-flex items-center gap-3 px-10 py-5 rounded-full font-semibold text-foreground bg-card border border-white/20 hover:border-accent-blue/50 hover:bg-card/80 transition-all hover:scale-105 shadow-2xl"
+              className="inline-flex items-center gap-3 px-10 py-5 rounded-full font-semibold text-foreground bg-card border border-white/20 hover:border-accent-blue/50 hover:bg-card/80 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] hover:shadow-[0_20px_60px_rgba(59,130,246,0.2)] shadow-2xl relative overflow-hidden group"
             >
-              <svg className="w-6 h-6" viewBox="0 0 24 24">
+              <div className="absolute inset-0 bg-gradient-to-r from-accent-blue/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <svg className="w-6 h-6 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />

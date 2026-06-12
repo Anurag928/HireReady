@@ -231,7 +231,7 @@ export default function MockInterviewPage() {
 
   useEffect(() => {
     if (roleTouched) return;
-    const profileRole = (dbUser?.target_role || dbUser?.role || user?.displayName || "AI/ML Engineer") as string;
+    const profileRole = (dbUser?.target_role || dbUser?.role || "") as string;
     if (profileRole) setConfig(prev => ({ ...prev, target_role: profileRole }));
   }, [dbUser, user, roleTouched]);
 

@@ -45,9 +45,14 @@ export interface InterviewStats {
 export interface UserProfile {
   uid: string; // Foreign key to User
   name?: string;
+  fullName?: string;
+  college?: string;
+  graduationYear?: string;
+  currentStatus?: string;
   email?: string;
   photoURL?: string;
   role: string;
+  education?: string;
   experienceLevel: string;
   skills: string[];
   targetRole: string;
