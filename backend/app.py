@@ -2,12 +2,12 @@ import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from dotenv import load_dotenv
+from werkzeug.exceptions import HTTPException
 
 # Load environment variables from .env
 load_dotenv()
 
 from services.mongo_service import init_db
-from routes.health import health_bp
 from routes.user import user_bp
 from routes.onboarding import onboarding_bp
 from routes.roadmap import roadmap_bp
@@ -24,16 +24,26 @@ def log_request():
         f"[Request] {request.method} {request.path} content_type={request.content_type}"
     )
 
+from flask import Response
+
 @app.errorhandler(Exception)
-def handle_unexpected_error(error):
+def handle_exception(error: Exception) -> tuple[Response, int]:
+    if isinstance(error, HTTPException):
+        return jsonify({
+            "success": False,
+            "message": error.description
+        }), (error.code or 500)
+
     app.logger.exception(f"[Unhandled Error] {error}")
-    return jsonify({"success": False, "error": "Internal server error"}), 500
+    return jsonify({
+        "success": False,
+        "message": str(error)
+    }), 500
 
 # Initialize MongoDB connection
 init_db(app)
 
 # Register blueprints
-app.register_blueprint(health_bp)
 app.register_blueprint(user_bp, url_prefix="/api")
 app.register_blueprint(onboarding_bp, url_prefix="/api")
 app.register_blueprint(roadmap_bp, url_prefix="/api")
@@ -41,11 +51,27 @@ app.register_blueprint(resume_bp, url_prefix="/api")
 app.register_blueprint(interview_bp, url_prefix="/api")
 app.register_blueprint(dashboard_bp, url_prefix="/api")
 
-@app.route("/ping")
-def ping():
-    return jsonify({"message": "pong"}), 200
+@app.route("/")
+def home():
+    return {
+        "status": "success",
+        "service": "HireReady AI Backend",
+        "message": "Backend running successfully"
+    }, 200
 
-print("Backend started successfully")
+@app.route("/health")
+def health():
+    return {
+        "status": "ok"
+    }, 200
+
+print("====================================================")
+print("HireReady AI Backend Started Successfully")
+print("====================================================")
+print("Registered Routes:")
+for rule in app.url_map.iter_rules():
+    print(rule)
+print("====================================================")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
