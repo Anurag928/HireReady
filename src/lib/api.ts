@@ -39,7 +39,7 @@ export type ResumeAnalysisResponse = {
 };
 
 export const API_BASE =
-  (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000").replace(/\/$/, "");
+  (process.env.NEXT_PUBLIC_API_URL || "https://hireready-53q1.onrender.com").replace(/\/$/, "");
 
 async function parseResponse(response: Response) {
   const contentType = response.headers.get("content-type") || "";

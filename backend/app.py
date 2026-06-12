@@ -16,7 +16,10 @@ from routes.interview import interview_bp
 from routes.dashboard import dashboard_bp
 
 app = Flask(__name__)
-CORS(app)  # type: ignore # Allow all origins for development
+CORS(app, origins=[ # type: ignore
+    "http://localhost:3000",
+    "https://your-frontend-domain.vercel.app"
+])
 
 @app.before_request
 def log_request():
