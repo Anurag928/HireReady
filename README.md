@@ -1,6 +1,6 @@
-# CareerPilot AI
+# HireReady
 
-**CareerPilot AI** is a premium, AI-driven career operating system designed to automate professional evolution. It transforms static career goals into dynamic, data-backed execution blueprints.
+**HireReady** is an AI-powered Career Intelligence Platform that helps users become hiring-ready through resume analysis, AI mock interviews, personalized roadmaps, skill-gap detection, and career insights.
 
 ---
 

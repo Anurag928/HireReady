@@ -1,5 +1,5 @@
 RESUME_DEBUG_PROMPT = """
-🧠 CAREERPILOT AI — NEURAL PIPELINE DIAGNOSTIC (DEBUG MODE)
+🧠 HIREREADY — NEURAL PIPELINE DIAGNOSTIC (DEBUG MODE)
 
 This is a STRICT technical diagnostic mode. You are acting as a validator for the AI-to-Frontend pipeline.
 Your goal is to verify data integrity and structural adherence.

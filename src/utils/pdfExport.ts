@@ -57,7 +57,7 @@ export async function exportRoadmapToPDF(elementId: string, careerPath: string) 
       pdf.setFontSize(10);
       pdf.setTextColor(100);
       // Header
-      pdf.text('CareerPilot AI', margin, margin - 2);
+      pdf.text('HireReady', margin, margin - 2);
       pdf.text('AI Intelligence Report', pdfWidth - margin, margin - 2, { align: 'right' });
       
       // Footer

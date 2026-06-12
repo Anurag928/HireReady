@@ -47,7 +47,7 @@ function SidebarContent({ onClose }: { onClose?: () => void }) {
             <Cpu className="w-6 h-6 text-blue-600 dark:text-blue-500 relative z-10" />
           </div>
           <div className="flex flex-col">
-             <span className="text-sm font-black uppercase tracking-[0.3em] leading-none text-zinc-900 dark:text-white">CareerPilot</span>
+             <span className="text-sm font-black uppercase tracking-[0.3em] leading-none text-zinc-900 dark:text-white">HireReady</span>
              <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-widest mt-1">Intelligence OS</span>
           </div>
         </Link>
@@ -232,8 +232,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                </button>
                <Link href="/" className="flex items-center gap-2">
                  <Bot className="w-5 h-5 text-blue-600 dark:text-blue-500" />
-                 <span className="text-[10px] sm:text-xs font-black uppercase tracking-tighter text-zinc-900 dark:text-white">
-                   CareerPilot <span className="text-blue-600 dark:text-blue-500">AI</span>
+                 <span className="text-[10px] sm:text-xs font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]">
+                   HireReady
                  </span>
                </Link>
             </div>

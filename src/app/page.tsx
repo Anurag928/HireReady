@@ -57,9 +57,8 @@ export default function LandingPage() {
               className="text-6xl md:text-8xl font-bold tracking-tighter mb-8 leading-[1.1] relative"
             >
               <div className="absolute inset-0 blur-xl opacity-20 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 z-[-1]" />
-              Your AI-Powered <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 animate-gradient-x relative z-10">
-                Placement Companion
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 drop-shadow-[0_0_8px_rgba(34,211,238,0.4)] relative z-10">
+                HireReady
               </span>
             </motion.h1>
 
@@ -67,7 +66,7 @@ export default function LandingPage() {
               variants={slideUp}
               className="text-lg md:text-2xl text-foreground/60 mb-12 max-w-3xl mx-auto leading-relaxed"
             >
-              Analyze resumes, prepare for interviews, track skills, and receive intelligent career roadmaps powered by AI.
+              Your AI-Powered Career Intelligence Platform for Resume Optimization, Mock Interviews, Skill Gap Analysis, and Career Roadmapping.
             </motion.p>
 
             <motion.div 

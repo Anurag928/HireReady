@@ -54,8 +54,8 @@ export function Navbar() {
           <div className="bg-accent-blue/10 p-2 rounded-lg group-hover:bg-accent-blue/20 transition-colors">
             <Bot className="w-6 h-6 text-accent-blue" />
           </div>
-          <span className="font-bold text-xl tracking-tight">
-            CareerPilot <span className="text-accent-blue">AI</span>
+          <span className="font-bold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]">
+            HireReady
           </span>
         </Link>
 

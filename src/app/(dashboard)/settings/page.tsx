@@ -349,7 +349,7 @@ export default function SettingsPage() {
                 <h3 className="text-xl font-black mb-2 text-foreground flex items-center gap-2">
                   <Bell className="w-5 h-5 text-emerald-500" /> Communication Preferences
                 </h3>
-                <p className="text-sm text-muted-foreground mb-8">Control what updates you receive from CareerPilot AI.</p>
+                <p className="text-sm text-muted-foreground mb-8">Control what updates you receive from HireReady.</p>
                 
                 <div className="space-y-2">
                   {[

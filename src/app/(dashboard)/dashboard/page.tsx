@@ -119,13 +119,13 @@ export default function DashboardPage() {
               AI Career Intelligence
             </div>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight flex flex-wrap items-center gap-3">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-foreground to-foreground/70">
-                Welcome back, {displayName}
+              <span>
+                Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]">HireReady</span>
               </span>
               <span>👋</span>
             </h1>
             <p className="text-lg text-foreground/70 font-medium max-w-3xl mt-1">
-              {career_insight}
+              Your personal career intelligence workspace.
             </p>
           </div>
 

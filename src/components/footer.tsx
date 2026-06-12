@@ -9,8 +9,8 @@ export function Footer() {
           <div className="md:col-span-1 space-y-4">
             <Link href="/" className="flex items-center gap-2">
               <Bot className="w-6 h-6 text-accent-blue" />
-              <span className="font-bold text-xl tracking-tight">
-                CareerPilot <span className="text-accent-blue">AI</span>
+              <span className="font-bold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]">
+                HireReady
               </span>
             </Link>
             <p className="text-foreground/60 text-sm">
@@ -61,7 +61,7 @@ export function Footer() {
         
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row items-center justify-between">
           <p className="text-sm text-foreground/60">
-            © {new Date().getFullYear()} CareerPilot AI. All rights reserved.
+            © {new Date().getFullYear()} HireReady. All rights reserved.
           </p>
         </div>
       </div>
