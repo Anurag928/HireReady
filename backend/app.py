@@ -16,14 +16,12 @@ from routes.interview import interview_bp
 from routes.dashboard import dashboard_bp
 
 app = Flask(__name__)
-CORS(app, resources={ # type: ignore
+CORS(app, supports_credentials=True, resources={ # type: ignore
     r"/api/*": {
         "origins": [
             "http://localhost:3000",
-            "https://hire-ready-self.vercel.app"
-        ],
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"]
+            "https://hire-ready-orcin.vercel.app"
+        ]
     }
 })
 
@@ -32,6 +30,13 @@ def log_request():
     app.logger.info(
         f"[Request] {request.method} {request.path} content_type={request.content_type}"
     )
+
+@app.after_request
+def after_request(response):
+    response.headers.add("Access-Control-Allow-Origin", "https://hire-ready-orcin.vercel.app")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+    response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
+    return response
 
 from flask import Response
 
