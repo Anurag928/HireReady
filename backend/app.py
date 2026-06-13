@@ -16,14 +16,19 @@ from routes.interview import interview_bp
 from routes.dashboard import dashboard_bp
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True, resources={ # type: ignore
-    r"/api/*": {
-        "origins": [
-            "http://localhost:3000",
-            "https://hire-ready-orcin.vercel.app"
-        ]
-    }
-})
+ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "https://hire-ready-orcin.vercel.app",
+    "https://hire-ready-self.vercel.app"
+]
+
+CORS(
+    app,  # type: ignore
+    origins=ALLOWED_ORIGINS,
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
+    supports_credentials=True
+)
 
 @app.before_request
 def log_request():
@@ -33,9 +38,8 @@ def log_request():
 
 @app.after_request
 def after_request(response):
-    response.headers.add("Access-Control-Allow-Origin", "https://hire-ready-orcin.vercel.app")
-    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
-    response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
+    # Let flask_cors handle the Access-Control-Allow-Origin header dynamically
+    # We only ensure basic headers if necessary, but flask_cors handles OPTIONS and headers.
     return response
 
 from flask import Response

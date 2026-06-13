@@ -139,7 +139,7 @@ def start_interview_session(uid: str, settings: dict) -> dict:
         question_count=question_count
     )
     
-    # 5. Call Gemini
+    # 5. Call Groq
     result = generate_with_retry(prompt)
     
     # Validate and fallback format

@@ -35,7 +35,7 @@ def start_interview_route():
     except RuntimeError as e:
         current_app.logger.exception(f"[Interview Route] Runtime error starting interview for {uid}: {e}")
         message = str(e)
-        status = 503 if "GEMINI_API_KEY" in message or "MongoDB is unavailable" in message or "overloaded" in message.lower() else 500
+        status = 503 if "GROQ_API_KEY" in message or "MongoDB is unavailable" in message or "overloaded" in message.lower() else 500
         return error_response(message, status)
     except Exception as e:
         current_app.logger.exception(f"[Interview Route] Error starting mock interview for {uid}: {e}")
@@ -70,7 +70,7 @@ def evaluate_answer_route():
     except RuntimeError as e:
         current_app.logger.exception(f"[Interview Route] Runtime error evaluating answer: {e}")
         message = str(e)
-        status = 503 if "GEMINI_API_KEY" in message or "MongoDB is unavailable" in message or "overloaded" in message.lower() else 500
+        status = 503 if "GROQ_API_KEY" in message or "MongoDB is unavailable" in message or "overloaded" in message.lower() else 500
         return error_response(message, status)
     except Exception as e:
         current_app.logger.exception(f"[Interview Route] Error evaluating answer: {e}")
@@ -108,7 +108,7 @@ def finalize_interview_route():
     except RuntimeError as e:
         current_app.logger.exception(f"[Interview Route] Runtime error finalizing interview for {uid}: {e}")
         message = str(e)
-        status = 503 if "GEMINI_API_KEY" in message or "MongoDB is unavailable" in message or "overloaded" in message.lower() else 500
+        status = 503 if "GROQ_API_KEY" in message or "MongoDB is unavailable" in message or "overloaded" in message.lower() else 500
         return error_response(message, status)
     except Exception as e:
         current_app.logger.exception(f"[Interview Route] Error finalising interview for {uid}: {e}")

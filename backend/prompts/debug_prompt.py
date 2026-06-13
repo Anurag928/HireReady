@@ -21,7 +21,7 @@ REQUIRED DEBUG STRUCTURE
 ========================
 {{
   "debug_info": {{
-    "gemini_response_status": "SUCCESS",
+    "groq_response_status": "SUCCESS",
     "raw_output_integrity": {{
         "is_empty": false,
         "is_partial": false,
@@ -42,7 +42,7 @@ REQUIRED DEBUG STRUCTURE
     }},
     "data_integrity_score": 0,
     "error_classification": null,
-    "final_debug_verdict": "Gemini working correctly OR Gemini response broken – pipeline issue detected"
+    "final_debug_verdict": "Groq working correctly OR Groq response broken – pipeline issue detected"
   }},
   "production_payload_preview": {{
     "confidence_metrics": {{ "ats_score": 0, "interview_probability": 0, "technical_depth": 0, "recruiter_confidence": 0 }},

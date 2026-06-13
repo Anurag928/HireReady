@@ -197,7 +197,7 @@ export default function RoadmapPage() {
                       </h3>
                       <p className="text-foreground/70 mb-6 leading-relaxed">
                         {error?.error_type === 'service_unavailable' 
-                          ? "Gemini appears overloaded right now. The machines require a brief existential recovery."
+                          ? "The Groq AI Engine appears temporarily overloaded. The machines require a brief existential recovery."
                           : "We've encountered unexpected turbulence while designing your roadmap."}
                       </p>
                       <button

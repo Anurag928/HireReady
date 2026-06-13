@@ -37,6 +37,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (user) {
         try {
+          // Ensure token exists before calling backend
+          await user.getIdToken();
+          
           // Sync user with backend
           const response = await createUserInBackend({
             uid: user.uid,
@@ -44,9 +47,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             email: user.email,
             photoURL: user.photoURL
           });
-          setDbUser(response.data.user);
+          setDbUser(response.data?.user || null);
         } catch (error) {
           console.error("Failed to sync user with backend:", error);
+          // Don't log out the user locally just because backend failed, but we can set dbUser to null
+          setDbUser(null);
         }
       } else {
         setDbUser(null);

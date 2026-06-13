@@ -115,7 +115,7 @@ export default function AIResumePage() {
         status: (dataHealthScore > 80 && !hasNulls) ? "HEALTHY" : "FAILURE",
         pipeline: {
           api: response ? "OK" : "FAIL",
-          gemini: analysis ? "OK" : "FAIL",
+          aiEngine: analysis ? "OK" : "FAIL",
           parsing: (dataHealthScore === 100) ? "OK" : "FAIL"
         },
         data_health: {
@@ -136,7 +136,7 @@ export default function AIResumePage() {
       setSelfTestReport({
         timestamp: new Date().toISOString(),
         status: "FAILURE",
-        pipeline: { api: "FAIL", gemini: "FAIL", parsing: "FAIL" },
+        pipeline: { api: "FAIL", aiEngine: "FAIL", parsing: "FAIL" },
         data_health: { score: 0, missing_fields: [], is_valid_json: false, has_nulls: false },
         ui_readiness: { ready: false, missing_components: ["All"] },
         error: err.message
@@ -305,7 +305,7 @@ export default function AIResumePage() {
                          <div className="grid grid-cols-2 gap-4 text-[10px] uppercase font-bold text-white/50">
                             <div>Latency: <span className="text-white">~4.2s</span></div>
                             <div>Tokens: <span className="text-white">1.8k</span></div>
-                            <div>Model: <span className="text-white">Gemini 1.5 Pro</span></div>
+                            <div>Model: <span className="text-white">Llama 3.3 70B (Groq)</span></div>
                             <div>CORS: <span className="text-white">Pass</span></div>
                          </div>
                       </div>

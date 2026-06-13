@@ -5,8 +5,7 @@ import logging
 import re
 import random
 from typing import Optional
-from google import genai
-from google.genai import types
+from groq import Groq
 from prompts.roadmap_prompt import ROADMAP_PROMPT_TEMPLATE
 
 def clean_json_response(text: str) -> str:
@@ -129,19 +128,24 @@ def validate_and_fill_roadmap(data: dict, user_profile: dict) -> dict:
 def generate_and_parse(client, prompt: str, model_name: str, user_profile: dict) -> dict:
     logging.info(f"[AI Stage] Model selected: {model_name}")
     print(f"Trying model: {model_name}")
-    response = client.models.generate_content(
+    response = client.chat.completions.create(
         model=model_name,
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            temperature=0.7,
-        )
+        messages=[
+            {"role": "system", "content": "You are a professional career advisor and AI assistant. Always output valid JSON."},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.7,
+        response_format={"type": "json_object"}
     )
     
-    logging.info("[AI Stage] Gemini raw response received")
+    logging.info("[AI Stage] Groq raw response received")
     
+    content = None
     try:
-        clean_text = clean_json_response(response.text)
+        content = response.choices[0].message.content
+        if not content:
+            raise ValueError("AI returned an empty response.")
+        clean_text = clean_json_response(content)
         data = json.loads(clean_text)
         data = validate_and_fill_roadmap(data, user_profile)
         logging.info("[AI Stage] Parsed and validated response successfully")
@@ -152,11 +156,11 @@ def generate_and_parse(client, prompt: str, model_name: str, user_profile: dict)
             "success": False,
             "stage": "json_parsing",
             "error": f"Failed to parse JSON: {str(e)}",
-            "raw_response": response.text[:500] if response.text else "None"
+            "raw_response": content[:500] if content else "None"
         }))
 
 def retry_generation(client, prompt: str, user_profile: dict) -> dict:
-    model_to_use = 'gemini-2.0-flash'
+    model_to_use = 'llama-3.3-70b-versatile'
     
     # Attempt 1
     logging.info("[AI Stage] Attempt 1 starting...")
@@ -180,7 +184,7 @@ def retry_generation(client, prompt: str, user_profile: dict) -> dict:
         return generate_and_parse(client, prompt, model_to_use, user_profile)
     except Exception as e:
         logging.error(f"[AI Stage] Attempt 3 failed: {e}")
-        logging.info("[AI Stage] All Gemini attempts failed. Using dynamic fallback.")
+        logging.info("[AI Stage] All Groq attempts failed. Using dynamic fallback.")
         return generate_dynamic_fallback(user_profile)
 
 def generate_roadmap_json(user_profile: dict, force_regenerate: bool = False, strategy_mode: Optional[str] = None) -> dict:
@@ -188,16 +192,16 @@ def generate_roadmap_json(user_profile: dict, force_regenerate: bool = False, st
     
     logging.info("[AI Stage] Request received for generation")
     
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = os.getenv("GROQ_API_KEY")
     if not api_key:
-        logging.error("[AI Stage] GEMINI_API_KEY not set")
+        logging.error("[AI Stage] GROQ_API_KEY not set")
         return generate_dynamic_fallback(user_profile)
     
     try:
-        client = genai.Client(api_key=api_key)
-        logging.info("[AI Stage] Gemini initialized successfully")
+        client = Groq(api_key=api_key)
+        logging.info("[AI Stage] Groq initialized successfully")
     except Exception as e:
-        logging.error(f"[AI Stage] Gemini initialization failed: {e}")
+        logging.error(f"[AI Stage] Groq initialization failed: {e}")
         return generate_dynamic_fallback(user_profile)
     
     try:
@@ -227,7 +231,7 @@ def generate_roadmap_json(user_profile: dict, force_regenerate: bool = False, st
         return generate_dynamic_fallback(user_profile)
     
     try:
-        logging.info("[AI Stage] Sending request to Gemini via retry logic")
+        logging.info("[AI Stage] Sending request to Groq via retry logic")
         roadmap_data = retry_generation(client, prompt, user_profile)
         return roadmap_data
     except Exception as e:

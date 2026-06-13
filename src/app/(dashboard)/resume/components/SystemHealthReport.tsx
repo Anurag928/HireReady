@@ -9,7 +9,7 @@ interface SelfTestReport {
   status: "HEALTHY" | "FAILURE";
   pipeline: {
     api: "OK" | "FAIL";
-    gemini: "OK" | "FAIL";
+    aiEngine: "OK" | "FAIL";
     parsing: "OK" | "FAIL";
   };
   data_health: {
@@ -71,11 +71,11 @@ export default function SystemHealthReport({ report, onClose }: Props) {
               status={report.pipeline.api} 
               sub="Connection established"
             />
-            {/* Gemini Status */}
+            {/* Groq Status */}
             <StatusCard 
               icon={Cpu} 
-              label="Gemini LLM" 
-              status={report.pipeline.gemini} 
+              label="Groq AI Engine" 
+              status={report.pipeline.aiEngine} 
               sub="Response latency: Normal"
             />
             {/* Parsing Status */}

@@ -52,8 +52,8 @@ def generate_roadmap_route():
             details={"error_type": "backend_error"}
         )
 
-@roadmap_bp.route('/test-gemini', methods=['GET'])
-def test_gemini_route():
+@roadmap_bp.route('/test-groq', methods=['GET'])
+def test_groq_route():
     from services.ai_service import generate_roadmap_json
     try:
         sample_user = {
@@ -65,7 +65,7 @@ def test_gemini_route():
             "learning_goals": "Master system design"
         }
         roadmap = generate_roadmap_json(sample_user)
-        return success_response(data={"roadmap": roadmap}, message="Test Gemini generation successful")
+        return success_response(data={"roadmap": roadmap}, message="Test Groq generation successful")
     except Exception as e:
         import json
         error_msg = str(e)

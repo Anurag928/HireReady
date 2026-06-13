@@ -7,6 +7,7 @@ export const api = axios.create({
   baseURL: BASE_URL,
   timeout: 60000,
   headers: { "Content-Type": "application/json" },
+  withCredentials: true,
 });
 
 // Global store for recent API stats (for Developer Debug Panel)
@@ -14,8 +15,20 @@ export const recentApiStats = {
   lastCall: null as any
 };
 
-api.interceptors.request.use((config) => {
+api.interceptors.request.use(async (config) => {
   (config as any).metadata = { startTime: new Date() };
+  
+  // Try to attach Firebase ID token if a user is logged in
+  try {
+    const { auth } = await import("@/lib/firebase");
+    if (auth.currentUser) {
+      const token = await auth.currentUser.getIdToken();
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  } catch (error) {
+    // Ignore error if Firebase isn't initialized yet
+  }
+
   return config;
 });
 
@@ -57,7 +70,15 @@ api.interceptors.response.use(
       error: message
     };
 
-    console.error("API Request Failed", errorDetails);
+    // Don't log 404s to console as they are often expected (e.g. checking if roadmap exists)
+    if (status !== 404) {
+      console.error(
+        `[API Request Failed] ${error.config?.method?.toUpperCase() || "UNKNOWN"} ${error.config?.url || "UNKNOWN"}`,
+        `\nStatus: ${error.response?.status || "Network Error / CORS Blocked"}`,
+        `\nMessage: ${message || "No message available"}`,
+        `\nBackend Error:`, error.response?.data || "None"
+      );
+    }
     
     return Promise.reject(error);
   }
