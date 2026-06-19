@@ -1,11 +1,14 @@
 import datetime
 from typing import Dict, Any
 
-from services.mongo_service import users_collection
+from services.mongo_service import get_collection
 from pymongo.errors import PyMongoError
 
 
 from typing import Dict, Any, Optional
+
+def _users_collection():
+    return get_collection("users")
 
 def upsert_onboarding(data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """Update onboarding information for an existing user.
@@ -45,11 +48,11 @@ def upsert_onboarding(data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     }
 
     try:
-        result = users_collection.update_one({"uid": uid}, {"$set": onboarding_fields})
+        result = _users_collection().update_one({"uid": uid}, {"$set": onboarding_fields})
         if result.matched_count == 0:
             raise RuntimeError(f"User with uid {uid} not found for onboarding update")
         # Return the latest document state
-        user_doc = users_collection.find_one({"uid": uid})
+        user_doc = _users_collection().find_one({"uid": uid})
         return user_doc
     except PyMongoError as e:
         raise RuntimeError(f"Database error during onboarding upsert: {e}")
