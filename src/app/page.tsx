@@ -353,7 +353,7 @@ export default function LandingPage() {
                        <motion.circle initial={{ strokeDasharray: "0 300" }} whileInView={{ strokeDasharray: "240 300" }} viewport={{ once: true }} transition={{ duration: 1.5, ease: "easeOut" }} cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="8" strokeLinecap="round" className="text-accent-purple shadow-[0_0_15px_rgba(168,85,247,0.5)]" />
                      </motion.svg>
                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                       <span className="text-5xl font-black">8.5</span>
+                       <span className="text-5xl font-black leading-none pb-1">8.5</span>
                        <span className="text-[10px] font-bold text-foreground/50 uppercase tracking-widest mt-1">Score</span>
                      </div>
                    </div>
