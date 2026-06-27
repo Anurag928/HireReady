@@ -49,10 +49,10 @@ export default function LandingPage() {
       <OrbSystem />
       <Navbar />
 
-      <main className="flex-1 pt-20">
+      <main className="flex-1 pt-14">
 
         {/* HERO SECTION */}
-        <section className="relative min-h-[90vh] flex items-center pt-32 pb-16 px-4 overflow-hidden">
+        <section className="relative min-h-[90vh] flex items-center pt-12 lg:pt-16 pb-16 px-4 overflow-hidden">
           <div className="container mx-auto max-w-[1200px] relative z-10 grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-12 items-center">
             
             {/* LEFT COLUMN: Typography & CTAs */}
