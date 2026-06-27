@@ -14,6 +14,7 @@ from routes.roadmap import roadmap_bp
 from routes.resume import resume_bp
 from routes.interview import interview_bp
 from routes.dashboard import dashboard_bp
+from routes.history import history_bp
 
 app = Flask(__name__)
 ALLOWED_ORIGINS = [
@@ -68,6 +69,7 @@ app.register_blueprint(roadmap_bp, url_prefix="/api")
 app.register_blueprint(resume_bp, url_prefix="/api")
 app.register_blueprint(interview_bp, url_prefix="/api")
 app.register_blueprint(dashboard_bp, url_prefix="/api")
+app.register_blueprint(history_bp, url_prefix="/api")
 
 @app.route("/")
 def home():

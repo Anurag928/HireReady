@@ -470,16 +470,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between p-5 rounded-2xl bg-card border border-border">
-                    <div className="flex items-center gap-4">
-                      <div className="p-3 rounded-full bg-muted text-muted-foreground"><Smartphone className="w-5 h-5" /></div>
-                      <div>
-                        <h4 className="font-bold text-foreground text-sm">Safari - iPhone</h4>
-                        <p className="text-xs text-muted-foreground mt-0.5">Last active: 2 days ago • IP: 104.28.1.1</p>
-                      </div>
-                    </div>
-                    <button className="text-xs font-bold text-red-500 hover:text-red-400 uppercase tracking-widest p-2">Revoke</button>
-                  </div>
+
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-4 border-t border-border pt-6">

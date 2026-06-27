@@ -24,7 +24,13 @@ def analyze_resume_route():
         resume_data = process_and_store_resume(uid, resume_text, target_role, job_description, debug_mode=debug_mode)
         
         # Log activity
-        log_activity(uid, "Resume Analyzed", "resume")
+        event_data = {
+            "resume_score": resume_data.get("analysis", {}).get("keywordMatch", 0),
+            "ats_score": resume_data.get("analysis", {}).get("atsScore", 0),
+            "missing_skills": resume_data.get("analysis", {}).get("missingKeywords", []),
+            "analysis_result": True
+        }
+        log_activity(uid, "Resume Analyzed", "resume", event_type="RESUME_ANALYZED", event_data=event_data)
         
         return success_response(data={"resume": resume_data}, message="Resume analyzed successfully")
     except Exception as e:

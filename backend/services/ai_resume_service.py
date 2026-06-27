@@ -21,7 +21,7 @@ def generate_with_retry(client, prompt: str, primary_model='llama-3.3-70b-versat
                     {"role": "system", "content": "You are a professional AI resume advisor. You MUST output your responses in valid JSON format only."},
                     {"role": "user", "content": prompt}
                 ],
-                temperature=0.7,
+                temperature=0.5,
                 response_format={"type": "json_object"}
             )
             

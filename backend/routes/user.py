@@ -35,6 +35,11 @@ def create_or_update_user():
         else:
             new_user = upsert_user(data, is_update=False)
             if new_user and "_id" in new_user: new_user["_id"] = str(new_user["_id"])
+            try:
+                from services.activity_service import log_activity
+                log_activity(data["uid"], "Account Created", "profile", event_type="ACCOUNT_CREATED")
+            except Exception as e:
+                current_app.logger.error(f"Failed to log ACCOUNT_CREATED: {e}")
             return jsonify({"message": "User saved successfully", "user": new_user}), 201
     except Exception as e:
         current_app.logger.error(f"User persistence error: {e}")

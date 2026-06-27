@@ -3,11 +3,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/auth-context";
-import { 
-  getResumeHistoryFromBackend, 
-  getRoadmapHistoryFromBackend, 
-  getMockInterviewHistory 
-} from "@/api";
+import { getUnifiedHistoryFromBackend } from "@/api";
 import { 
   History, 
   Search, 
@@ -49,75 +45,17 @@ export default function GlobalHistoryPage() {
       setLoading(true);
       setError(null);
       try {
-        const [resumeRes, roadmapRes, interviewRes] = await Promise.allSettled([
-          getResumeHistoryFromBackend(user.uid),
-          getRoadmapHistoryFromBackend(user.uid),
-          getMockInterviewHistory(user.uid)
-        ]);
-
-        const merged: HistoryItem[] = [];
-
-        // Parse Resumes
-        if (resumeRes.status === "fulfilled" && resumeRes.value.data?.success) {
-          const resumes = resumeRes.value.data.data?.history || [];
-          resumes.forEach((r: any) => {
-            const metrics = r.analysis?.confidence_metrics || {};
-            const verdict = r.analysis?.recruiter_scan || {};
-            const score = r.atsScore || r.ats_score || metrics.ats_score || null;
-            const summary = r.verdict || r.recruiter_feedback || verdict.first_impression || "ATS Scan completed.";
-            
-            merged.push({
-              id: r._id || r.id || Math.random().toString(),
-              type: "resume",
-              date: new Date(r.upload_date || r.createdAt),
-              title: r.targetRole || r.target_role || "Resume Analysis",
-              score,
-              summary,
-              tags: ["ATS", score >= 80 ? "High Match" : "Needs Work"],
-              raw: r
-            });
-          });
+        const res = await getUnifiedHistoryFromBackend(user.uid);
+        
+        if (res.data?.success && res.data?.data?.history) {
+          const formattedHistory = res.data.data.history.map((item: any) => ({
+            ...item,
+            date: new Date(item.date || Date.now())
+          }));
+          setItems(formattedHistory);
+        } else {
+          setItems([]);
         }
-
-        // Parse Roadmaps
-        if (roadmapRes.status === "fulfilled" && roadmapRes.value.data?.success) {
-          const roadmaps = roadmapRes.value.data.data?.history || [];
-          roadmaps.forEach((r: any) => {
-            const path = r.roadmap?.career_path || r.career_path || "Career Roadmap";
-            merged.push({
-              id: r._id || r.id || Math.random().toString(),
-              type: "roadmap",
-              date: new Date(r.created_at || r.createdAt),
-              title: path,
-              score: null,
-              summary: `Generated timeline: ${r.roadmap?.estimated_timeline || "N/A"}. Includes project & cert recommendations.`,
-              tags: ["Strategy", "Planning"],
-              raw: r
-            });
-          });
-        }
-
-        // Parse Interviews
-        if (interviewRes.status === "fulfilled" && interviewRes.value.data?.success) {
-          const interviews = interviewRes.value.data.data || [];
-          interviews.forEach((i: any) => {
-            const score = i.overallScore || i.overall_score || null;
-            merged.push({
-              id: i._id || i.id || Math.random().toString(),
-              type: "interview",
-              date: new Date(i.created_at || i.createdAt),
-              title: i.targetRole || i.target_role || "Mock Interview",
-              score,
-              summary: i.recruiterVerdict?.hiringRecommendation || "Interview session completed.",
-              tags: [i.difficulty || "Mixed", i.companyStyle || "Standard"],
-              raw: i
-            });
-          });
-        }
-
-        // Sort descending by date
-        merged.sort((a, b) => b.date.getTime() - a.date.getTime());
-        setItems(merged);
 
       } catch (err) {
         console.error("History fetch failed", err);
@@ -171,8 +109,8 @@ export default function GlobalHistoryPage() {
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent-blue/10 text-accent-blue text-xs font-bold uppercase tracking-wider mb-4 border border-accent-blue/20">
               <History className="w-4 h-4" /> Global Archive
             </div>
-            <h1 className="text-3xl md:text-5xl font-black tracking-tight text-foreground">
-              Career Intelligence <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-blue to-accent-purple">History</span>
+            <h1 className="text-4xl md:text-5xl font-black tracking-tight text-foreground leading-[1.15] md:leading-[1.2] pb-2">
+              Career Intelligence <br className="md:hidden" /><span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-blue to-accent-purple">History</span>
             </h1>
             <p className="text-muted-foreground mt-4 max-w-2xl text-lg">
               Review your past AI assessments, mock interviews, and career roadmaps. Track your progression over time.
@@ -210,7 +148,7 @@ export default function GlobalHistoryPage() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-32">
             <div className="w-12 h-12 border-4 border-accent-blue/20 border-t-accent-blue rounded-full animate-spin mb-4" />
-            <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Syncing Archives...</p>
+            <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest">Loading your career intelligence history...</p>
           </div>
         ) : error ? (
           <div className="bg-red-500/10 border border-red-500/20 rounded-3xl p-8 flex items-center gap-4 text-red-500">
@@ -225,7 +163,7 @@ export default function GlobalHistoryPage() {
             <History className="w-16 h-16 text-muted-foreground/30 mb-4" />
             <h3 className="text-xl font-bold text-foreground mb-2">No Records Found</h3>
             <p className="text-muted-foreground max-w-sm">
-              {searchQuery ? "No history matches your search criteria." : "You haven't run any AI analyses or interviews yet."}
+              {searchQuery ? "No history matches your search criteria." : "No AI activity found yet. Start creating your roadmap, resume analysis, or mock interview."}
             </p>
           </div>
         ) : (

@@ -283,7 +283,7 @@ export default function RoadmapPage() {
           transition={{ duration: 0.6, delay: 0.5 }}
         >
           <div className="flex flex-col items-center mb-12 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 pb-2 mb-2">
               Venture-Grade Projects
             </h2>
             <p className="text-foreground/60 max-w-2xl">

@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 import logging
 from typing import List, Dict
 
-def log_activity(uid: str, title: str, category: str = "general") -> bool:
+def log_activity(uid: str, title: str, category: str = "general", event_type: str = None, event_data: dict = None) -> bool:
     """
     Logs a new user activity into the database.
     
@@ -10,6 +10,8 @@ def log_activity(uid: str, title: str, category: str = "general") -> bool:
         uid: User ID
         title: Description of the activity (e.g. "Roadmap Generated")
         category: Category string (e.g. "roadmap", "interview", "resume", "profile")
+        event_type: Uppercase event identifier (e.g., "ACCOUNT_CREATED")
+        event_data: Optional dictionary containing event details
     """
     try:
         from services.mongo_service import get_collection
@@ -19,6 +21,8 @@ def log_activity(uid: str, title: str, category: str = "general") -> bool:
             "uid": uid,
             "title": title,
             "category": category,
+            "event_type": event_type or category.upper(),
+            "event_data": event_data or {},
             "timestamp": datetime.now(timezone.utc)
         }
         collection.insert_one(doc)

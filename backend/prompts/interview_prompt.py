@@ -80,12 +80,20 @@ The response must be valid JSON ONLY. Do not include markdown formatting like ``
 
 JSON Output Format:
 {{
-  "technicalDepth": 82,
-  "communication": 75,
-  "confidence": 88,
-  "completeness": 80,
-  "overallQuality": 81,
-  "feedback": "Great overview of using Redis. You correctly identified cache invalidation as a risk, but you could have elaborated more on specific eviction policies like LRU.",
+  "score": 85,
+  "feedback": "Your answer shows good understanding of the concept but could include more examples.",
+  "strengths": [
+    "Good explanation",
+    "Clear communication"
+  ],
+  "improvements": [
+    "Add technical details"
+  ],
+  "category_score": {{
+    "technical": 80,
+    "communication": 90,
+    "problem_solving": 85
+  }},
   "follow_up_question": "You mentioned using Redis for caching session data. How would you handle high availability or node failure in your Redis setup?"
 }}
 """

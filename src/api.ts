@@ -141,3 +141,5 @@ export const getMockInterviewHistory = (uid: string) => api.get(`/mock-interview
 export const deleteMockInterview = (interviewId: string) => api.delete(`/mock-interview/history/${interviewId}`);
 
 export const getDashboardMetrics = (uid: string) => api.get(`/dashboard/${uid}`);
+
+export const getUnifiedHistoryFromBackend = (uid: string) => api.get(`/history/${uid}`);

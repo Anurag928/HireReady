@@ -87,13 +87,19 @@ def get_dashboard_metrics(uid):
         if not github_connected:
             missing_sections.append("Connect GitHub")
 
-        # 6. Readiness Score (Weighted Average)
-        readiness_components = []
-        if resume_intelligence: readiness_components.append(resume_intelligence["ats_score"])
-        if mock_interview_stats: readiness_components.append(mock_interview_stats["average_score"])
-        if profile_strength > 0: readiness_components.append(profile_strength)
+        # Roadmap Percentage
+        roadmap_percentage = 0
+        if roadmap_progress and int(roadmap_progress.get("total_milestones", 0)) > 0:
+            completed = int(roadmap_progress.get("completed_milestones", 0))
+            total = int(roadmap_progress.get("total_milestones", 1))
+            roadmap_percentage = int((completed / total) * 100)
+
+        # 6. Readiness Score (Strict Formula)
+        # Career Readiness = (Resume Score + Roadmap Completion + Interview Performance + Profile Completion) / 4
+        resume_score = resume_intelligence["ats_score"] if resume_intelligence else 0
+        interview_score = mock_interview_stats["average_score"] if mock_interview_stats else 0
         
-        readiness_score = int(sum(readiness_components) / len(readiness_components)) if readiness_components else 0
+        readiness_score = int((resume_score + roadmap_percentage + interview_score + profile_strength) / 4)
         
         status = "Beginner"
         if readiness_score >= 90: status = "Industry Ready"
@@ -102,29 +108,28 @@ def get_dashboard_metrics(uid):
         elif readiness_score >= 40: status = "Developing"
         
         # 7. Market Fit Score / Alignment
-        market_alignment = 82 # Baseline if they have skills
-        if len(skills) < 3: market_alignment = 40
-        elif len(skills) < 5: market_alignment = 65
-        if mock_interview_stats and mock_interview_stats["average_score"] > 80: market_alignment += 10
+        market_alignment = 0
+        target_role = user.get("targetRole", "Not Selected")
+        if target_role and target_role != "Not Selected":
+            if resume_intelligence and resume_intelligence.get("keyword_match", 0) > 0:
+                market_alignment = resume_intelligence["keyword_match"]
+            else:
+                if len(skills) >= 5: market_alignment = 65
+                elif len(skills) >= 3: market_alignment = 40
+                else: market_alignment = 20
+        
+        if mock_interview_stats and mock_interview_stats["average_score"] > 80: 
+            market_alignment += 10
         if market_alignment > 100: market_alignment = 100
 
         # Top Skill Gap
         top_skill_gap = "Upload Resume"
         if resume_intelligence and resume_intelligence.get("missing_keywords"):
             top_skill_gap = resume_intelligence["missing_keywords"][0]
-        elif not resume_intelligence and len(skills) > 0:
-            top_skill_gap = "Take Mock Interview"
 
         # Current Position
         current_position = user.get("role") or "Building Profile"
         if current_position == "student": current_position = f"Aspiring {user.get('targetRole', 'Not Selected')}"
-
-        # Roadmap Percentage
-        roadmap_percentage = 0
-        if roadmap_progress and int(roadmap_progress.get("total_milestones", 0)) > 0:
-            completed = int(roadmap_progress.get("completed_milestones", 0))
-            total = int(roadmap_progress.get("total_milestones", 1))
-            roadmap_percentage = int((completed / total) * 100)
 
         # Generate insight based on available data
         if readiness_score > 75:

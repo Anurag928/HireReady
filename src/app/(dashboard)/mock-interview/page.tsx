@@ -467,14 +467,14 @@ export default function MockInterviewPage() {
         rec.lang = "en-US";
 
         rec.onresult = (event: SpeechRecognitionEvent) => {
-          let transcriptStr = "";
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            transcriptStr += event.results[i][0].transcript;
+          let currentTranscript = "";
+          for (let i = 0; i < event.results.length; i++) {
+            currentTranscript += event.results[i][0].transcript;
           }
           if (isFollowUpStep) {
-            setFollowUpAnswer(transcriptStr);
+            setFollowUpAnswer(currentTranscript);
           } else {
-            setAnswerText(transcriptStr);
+            setAnswerText(currentTranscript);
           }
         };
 
@@ -625,22 +625,42 @@ export default function MockInterviewPage() {
   };
 
   const handleSubmitAnswer = async () => {
-    if (!answerText.trim()) return;
+    const finalAnswer = [answerText.trim(), notes.trim()].filter(Boolean).join("\n\nManual Notes:\n");
+    if (!finalAnswer) return;
     setIsSubmittingAnswer(true);
     setIsListening(false);
     if (recognition) recognition.stop();
 
     const currentQuestion = questions[currentQuestionIndex];
     
-    // As per requirement: "Do NOT evaluate publicly. Store evaluation internally. Move to next question."
-    // And "Evaluate ALL answers together."
+    let evaluationResult = null;
+    try {
+      console.log("Submitting answer");
+      const res = await evaluateMockInterviewAnswer({
+        settings: config,
+        active_question: currentQuestion,
+        answer: finalAnswer
+      });
+      console.log("Evaluation received");
+
+      if (res.data?.success) {
+        evaluationResult = res.data.data;
+      } else {
+        console.error("Backend error:", res.data?.error);
+        evaluationResult = { error: res.data?.error || "Evaluation unavailable" };
+      }
+    } catch (err: any) {
+      console.error("Failed to evaluate answer:", err);
+      evaluationResult = { error: "Evaluation unavailable" };
+    }
+    
     const finalTranscript = [...sessionTranscript, {
       questionNumber: currentQuestionIndex + 1,
       type: currentQuestion.type,
       difficulty: currentQuestion.difficulty,
       question: currentQuestion.question,
-      answer: answerText,
-      evaluation: null // Evaluated together at the end
+      answer: finalAnswer,
+      evaluation: evaluationResult
     }];
     
     setSessionTranscript(finalTranscript);
@@ -662,6 +682,7 @@ export default function MockInterviewPage() {
         return nextIdx;
       });
       setAnswerText("");
+      setNotes("");
       setActiveEvaluation(null);
       setFollowUpQuestion(null);
       setFollowUpAnswer("");
@@ -1679,7 +1700,7 @@ export default function MockInterviewPage() {
                     className="p-4 rounded-3xl bg-accent-blue/5 border border-accent-blue/10 flex items-center justify-between gap-4"
                   >
                     <div className="flex flex-col">
-                      <span className="text-xs font-bold text-accent-blue">Transcribing Speech...</span>
+                      <span className="text-xs font-bold text-accent-blue">Listening...</span>
                       <span className="text-[10px] text-muted-foreground">Speak clearly into your microphone.</span>
                     </div>
 
@@ -1733,7 +1754,7 @@ export default function MockInterviewPage() {
                   {questions.length === 0 && isSubmittingAnswer ? (
                     <div className="flex items-center gap-2 justify-center md:justify-start py-2">
                       <Loader2 className="w-4 h-4 text-accent-blue animate-spin" />
-                      <span className="text-sm text-muted-foreground">Analyzing profile and generating questions...</span>
+                      <span className="text-sm text-muted-foreground">Analyzing your response...</span>
                     </div>
                   ) : (
                     <p className="text-foreground font-semibold text-sm md:text-base break-words overflow-hidden max-w-full leading-relaxed whitespace-pre-wrap">
@@ -1774,10 +1795,10 @@ export default function MockInterviewPage() {
                   )}
                 </div>
 
-                {/* Tabs: Speak / Transcript / Notes */}
+                {/* Tabs: Speak / Notes */}
                 <div>
                   <div className="flex gap-2 mb-3">
-                    {['Speak','Transcript','Notes'].map(t => (
+                    {['Speak','Notes'].map(t => (
                       <button key={t} onClick={() => setResponseTab(t as "Speak" | "Transcript" | "Notes")} className={`px-3 py-2 rounded-xl text-xs font-semibold ${responseTab===t ? 'bg-accent-blue text-white' : 'bg-background/5 text-foreground border border-border/40'}`}>
                         {t}
                       </button>
@@ -1792,16 +1813,8 @@ export default function MockInterviewPage() {
                       </div>
                     )}
 
-                    {responseTab === 'Transcript' && (
-                      <div className="p-3 rounded-2xl bg-background/55 border border-border/80 min-h-[160px]">
-                        <div className="text-sm text-foreground leading-relaxed max-h-48 overflow-y-auto custom-scrollbar">
-                          {sessionTranscript.length === 0 ? <div className="text-muted-foreground">No transcript yet.</div> : sessionTranscript.map((s,i)=>(<div key={i} className="mb-2"><strong>Q{s.questionNumber}:</strong> {s.answer}</div>))}
-                        </div>
-                      </div>
-                    )}
-
                     {responseTab === 'Notes' && (
-                      <textarea value={notes} onChange={(e)=>setNotes(e.target.value)} placeholder="Personal notes..." className="w-full min-h-[160px] p-3 rounded-2xl bg-background/55 border border-border/80 text-sm" />
+                      <textarea value={notes} onChange={(e)=>setNotes(e.target.value)} placeholder="Type your answer here if you prefer not to use voice..." className="w-full min-h-[160px] p-3 rounded-2xl bg-background/55 border border-border/80 text-sm" />
                     )}
                   </div>
                 </div>
@@ -1829,7 +1842,7 @@ export default function MockInterviewPage() {
                         {isEvaluatingFollowUp ? (
                           <>
                             <Loader2 className="w-4 h-4 animate-spin" />
-                            Processing response...
+                            Analyzing your response...
                           </>
                         ) : (
                           <>
@@ -1841,13 +1854,13 @@ export default function MockInterviewPage() {
                     ) : (
                       <button
                         onClick={handleSubmitAnswer}
-                        disabled={isSubmittingAnswer || !answerText.trim() || questions.length === 0}
+                        disabled={isSubmittingAnswer || !(answerText.trim() || notes.trim()) || questions.length === 0}
                         className="px-5 py-3 rounded-xl font-bold bg-accent-blue text-white hover:bg-accent-blue/95 disabled:bg-accent-blue/40 text-xs transition-all flex items-center gap-1.5 shadow-md duration-300 cursor-pointer w-full md:w-auto justify-center"
                       >
                         {isSubmittingAnswer ? (
                           <>
                             <Loader2 className="w-4 h-4 animate-spin" />
-                            Processing response...
+                            Analyzing your response...
                           </>
                         ) : (
                           <>
@@ -2084,20 +2097,29 @@ export default function MockInterviewPage() {
                   
                   <div className="flex flex-col gap-4">
                     {scorecard.transcript?.map((item: any, i: number) => {
-                      const evalScore = item.evaluation?.overallQuality || 0;
+                      const evalObj = item.evaluation || {};
+                      const hasError = !!evalObj.error;
+                      const evalScore = evalObj.score !== undefined ? evalObj.score : (evalObj.overallQuality !== undefined ? evalObj.overallQuality : undefined);
+                      
                       return (
                         <div key={i} className="border border-border/50 bg-background/50 rounded-2xl p-5 md:p-6 flex flex-col gap-4 transition-all hover:border-accent-blue/30">
                           <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
                             <div className="flex-1 flex flex-col gap-2">
                               <div className="flex items-center gap-3">
                                 <span className="bg-accent-blue/10 text-accent-blue font-bold px-3 py-1 rounded-lg text-xs uppercase tracking-wider">Question {i + 1}</span>
-                                <span className="text-xs font-semibold text-muted-foreground">{item.type}</span>
+                                <span className="text-xs font-semibold text-muted-foreground">Category: {evalObj.category || item.type || "Technical"}</span>
                               </div>
                               <p className="text-foreground font-semibold text-sm md:text-base leading-relaxed mt-1">{item.question}</p>
                             </div>
                             <div className="flex flex-col items-end shrink-0">
-                              <span className={`text-2xl font-black ${getGradeAndColor(evalScore).color}`}>{evalScore}%</span>
-                              <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Score</span>
+                              {hasError || evalScore === undefined ? (
+                                <span className="text-sm font-bold text-red-500 uppercase tracking-wider">Evaluation unavailable</span>
+                              ) : (
+                                <>
+                                  <span className={`text-2xl font-black ${getGradeAndColor(evalScore).color}`}>{evalScore}%</span>
+                                  <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Score</span>
+                                </>
+                              )}
                             </div>
                           </div>
                           
@@ -2108,7 +2130,9 @@ export default function MockInterviewPage() {
                             </div>
                             <div className="bg-accent-purple/5 rounded-xl p-4 border border-accent-purple/10">
                               <span className="text-[10px] font-bold text-accent-purple uppercase tracking-wider mb-2 block">AI Feedback</span>
-                              <p className="text-xs text-foreground/90 leading-relaxed">{item.evaluation?.feedback}</p>
+                              <p className="text-xs text-foreground/90 leading-relaxed">
+                                {hasError || !evalObj.feedback ? "Feedback unavailable" : evalObj.feedback}
+                              </p>
                             </div>
                           </div>
                         </div>

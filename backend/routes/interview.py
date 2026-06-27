@@ -102,7 +102,12 @@ def finalize_interview_route():
         scorecard = finalize_interview_session(uid, settings, transcript)
         
         # Log activity
-        log_activity(uid, "Interview Completed", "interview")
+        event_data = {
+            "interview_score": scorecard.get("overallScore", 0),
+            "questions_count": len(transcript),
+            "feedback": scorecard.get("feedback", "")
+        }
+        log_activity(uid, "Interview Completed", "interview", event_type="INTERVIEW_COMPLETED", event_data=event_data)
         
         return success_response(data=scorecard, message="Interview report compiled successfully")
     except RuntimeError as e:

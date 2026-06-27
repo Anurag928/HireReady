@@ -172,12 +172,8 @@ def evaluate_user_answer(settings: dict, active_question: dict, answer: str, his
     
     result = generate_with_retry(prompt)
     
-    # Enforce default fields
-    result.setdefault("technicalDepth", 50)
-    result.setdefault("communication", 50)
-    result.setdefault("confidence", 50)
-    result.setdefault("completeness", 50)
-    result.setdefault("overallQuality", 50)
+    # The AI response is expected to match the new JSON format (score, feedback, etc.)
+    # We will not force a default score unless it's missing, but we leave it as returned by Groq.
     result.setdefault("feedback", "Completed response.")
     result.setdefault("follow_up_question", None)
     
@@ -249,7 +245,8 @@ def finalize_interview_session(uid: str, settings: dict, transcript: list) -> di
     weaknesses = scorecard.get("weaknesses", [])
     learning_plan = scorecard.get("learningPlan", {})
     timeline = scorecard.get("timeline", [])
-    
+    # (Removed overwriting transcript with evaluatedTranscript since evaluation is done per-answer)
+            
     # Calculate Achievements
     achievements = []
     

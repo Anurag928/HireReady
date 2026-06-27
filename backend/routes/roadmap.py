@@ -20,7 +20,12 @@ def generate_roadmap_route():
         roadmap = create_and_store_roadmap(uid, force_regenerate=force_regenerate, strategy_mode=strategy_mode)
         
         # Log activity
-        log_activity(uid, "Roadmap Generated", "roadmap")
+        event_data = {
+            "target_role": roadmap.get("targetRole", "Not Selected"),
+            "progress_percentage": 0,
+            "roadmap_data": True
+        }
+        log_activity(uid, "Roadmap Generated", "roadmap", event_type="ROADMAP_CREATED", event_data=event_data)
         
         return success_response(data={"roadmap": roadmap}, message="Roadmap generated successfully")
     except Exception as e:
@@ -38,9 +43,9 @@ def generate_roadmap_route():
             if "stage" in error_data and "error" in error_data:
                 current_app.logger.error(f"Roadmap generation failed at stage [{error_data['stage']}]: {error_data['error']}")
                 return error_response(
-                    "AI generation encountered turbulence. Please retry.",
+                    error_data['error'],
                     500, 
-                    details={"error_type": "backend_error"}
+                    details={"error_type": "backend_error", "stage": error_data['stage']}
                 )
         except:
             pass

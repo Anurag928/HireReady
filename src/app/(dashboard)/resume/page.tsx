@@ -350,7 +350,7 @@ export default function AIResumePage() {
                       </div>
                     </div>
                     
-                    <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 dark:from-zinc-100 dark:via-zinc-300 dark:to-zinc-500 mb-6 drop-shadow-sm">
+                    <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 dark:from-zinc-100 dark:via-zinc-300 dark:to-zinc-500 pb-2 mb-4 drop-shadow-sm">
                       AI Recruiter Intelligence
                     </h2>
                     <p className="text-base md:text-lg text-zinc-600 dark:text-zinc-400 font-medium max-w-xl mx-auto leading-relaxed mb-10">

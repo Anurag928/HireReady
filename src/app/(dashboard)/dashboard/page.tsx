@@ -149,7 +149,7 @@ export default function DashboardPage() {
               <div className="absolute top-0 right-0 w-16 h-16 bg-accent-blue/10 rounded-full blur-xl" />
               <p className="text-xs text-foreground/50 font-medium uppercase mb-1">Career Readiness</p>
               <div className="flex items-end gap-2">
-                <span className="text-2xl font-bold">{readiness_score > 0 ? `${readiness_score}%` : 'N/A'}</span>
+                <span className="text-2xl font-bold">{readiness_score !== null && readiness_score !== undefined ? `${readiness_score}%` : 'N/A'}</span>
               </div>
               <p className="text-[10px] text-foreground/50 mt-0.5">{readiness_score > 0 ? readiness_status : 'Not Available'}</p>
             </div>
@@ -159,9 +159,9 @@ export default function DashboardPage() {
               <div className="absolute top-0 right-0 w-16 h-16 bg-accent-purple/10 rounded-full blur-xl" />
               <p className="text-xs text-foreground/50 font-medium uppercase mb-1">Market Match</p>
               <div className="flex items-end gap-2">
-                <span className="text-2xl font-bold">{readiness_score > 0 ? `${market_alignment}%` : 'N/A'}</span>
+                <span className="text-2xl font-bold">{market_alignment !== null && market_alignment !== undefined ? `${market_alignment}%` : 'N/A'}</span>
               </div>
-              <p className="text-[10px] text-foreground/50 mt-0.5">{readiness_score > 0 ? market_trend : 'Generate Roadmap'}</p>
+              <p className="text-[10px] text-foreground/50 mt-0.5">{market_alignment > 0 ? market_trend : 'Generate Roadmap'}</p>
             </div>
 
             {/* Top Skill Gap */}
@@ -175,9 +175,9 @@ export default function DashboardPage() {
               <div className="absolute top-0 right-0 w-16 h-16 bg-green-500/10 rounded-full blur-xl" />
               <p className="text-xs text-foreground/50 font-medium uppercase mb-1">Roadmap Progress</p>
               <div className="flex items-end gap-2">
-                <span className="text-2xl font-bold">{roadmap_percentage > 0 ? `${roadmap_percentage}%` : 'N/A'}</span>
+                <span className="text-2xl font-bold">{roadmap_progress ? `${roadmap_percentage}%` : 'N/A'}</span>
               </div>
-              <p className="text-[10px] text-foreground/50 mt-0.5">{roadmap_percentage > 0 ? `Phase ${roadmap_progress?.completed_milestones + 1}` : 'Not Started'}</p>
+              <p className="text-[10px] text-foreground/50 mt-0.5">{roadmap_progress ? `Phase ${roadmap_progress?.completed_milestones + 1}` : 'Not Started'}</p>
             </div>
 
           </div>
@@ -195,7 +195,7 @@ export default function DashboardPage() {
           { label: "Profile Strength", value: `${profile_strength}%`, trend: missing_sections.length ? `${missing_sections.length} Action(s) Needed` : "All Complete", icon: CheckCircle2, color: profile_strength === 100 ? "text-green-400" : "text-yellow-400", border: profile_strength === 100 ? "hover:border-green-400/30" : "hover:border-yellow-400/30", glow: profile_strength === 100 ? "group-hover:shadow-[0_0_20px_rgba(74,222,128,0.15)]" : "group-hover:shadow-[0_0_20px_rgba(250,204,21,0.15)]" },
           { label: "Career Readiness", value: `${readiness_score}%`, trend: readiness_status, icon: Target, color: readiness_score >= 80 ? "text-accent-blue" : "text-orange-400", border: readiness_score >= 80 ? "hover:border-accent-blue/30" : "hover:border-orange-400/30", glow: readiness_score >= 80 ? "group-hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]" : "group-hover:shadow-[0_0_20px_rgba(251,146,60,0.15)]" },
           { label: "AI Market Fit", value: `${market_alignment}%`, trend: market_trend, icon: TrendingUp, color: "text-accent-purple", border: "hover:border-accent-purple/30", glow: "group-hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]" },
-          { label: "Mock Interview Avg", value: mock_interview ? mock_interview.average_score : "N/A", trend: mock_interview ? `Best: ${mock_interview.best_score}` : "Not Taken", icon: Briefcase, color: "text-green-400", border: "hover:border-green-400/30", glow: "group-hover:shadow-[0_0_20px_rgba(74,222,128,0.15)]" }
+          { label: "Mock Interview Avg", value: mock_interview ? `${mock_interview.average_score}%` : "N/A", trend: mock_interview ? `Best: ${mock_interview.best_score}%` : "Not Taken", icon: Briefcase, color: "text-green-400", border: "hover:border-green-400/30", glow: "group-hover:shadow-[0_0_20px_rgba(74,222,128,0.15)]" }
         ].map((stat, i) => (
           <motion.div
             key={i}
